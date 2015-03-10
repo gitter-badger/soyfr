@@ -37,7 +37,7 @@ func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
 
 func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
 	user := User{}
-	err := s.Connection.Collection("user").FindById(bson.ObjectIdHex(ID), user)
+	err := s.Connection.Collection("user").FindById(bson.ObjectIdHex(ID), &user)
 
 	return user, err
 }
