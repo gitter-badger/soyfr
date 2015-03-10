@@ -3,6 +3,9 @@
   "author": "manyminds",
   "devDependencies": {
     "grunt": "*",
-    "bower": "*"
+    "bower": "*",
+    "grunt-contrib-less": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-watch": "*"
   }
 }
