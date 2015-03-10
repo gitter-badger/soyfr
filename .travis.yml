@@ -4,5 +4,8 @@ go:
 
 services: mongodb
 
+install:
+  - go get github.com/tools/godep
+
 script:
-  cd library && godep go test
+  - cd library && godep go test
