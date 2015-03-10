@@ -1,0 +1,8 @@
+{
+  "name": "soyfer",
+  "author": "manyminds",
+  "devDependencies": {
+    "grunt": "*",
+    "bower": "*"
+  }
+}
