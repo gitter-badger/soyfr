@@ -1,0 +1,37 @@
+{
+	"ImportPath": "github.com/manyminds/soyfr",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gedex/inflector",
+			"Rev": "8c0e57904488c554ab26caec525db5c92b23f051"
+		},
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Rev": "46807412fe50aaceb73bb57061c2230fd26a1640"
+		},
+		{
+			"ImportPath": "github.com/maxwellhealth/bongo",
+			"Comment": "v0.9.3",
+			"Rev": "60879a17068ee5f4eec1ee8d556ed3dbc9b79a94"
+		},
+		{
+			"ImportPath": "github.com/maxwellhealth/go-dotaccess",
+			"Rev": "ae070a2d2a38fd7233e255ded21fb26fe36b4796"
+		},
+		{
+			"ImportPath": "github.com/oleiade/reflections",
+			"Comment": "0.1.2-2-g632977f",
+			"Rev": "632977f98cd34d217c4b57d0840ec188b3d3dcaf"
+		},
+		{
+			"ImportPath": "github.com/univedo/api2go",
+			"Rev": "0aa861321b70f1a4569e44a30fdd6b7fad616a74"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2015.01.24",
+			"Rev": "c6a7dce14133ccac2dcac3793f1d6e2ef048503a"
+		}
+	]
+}

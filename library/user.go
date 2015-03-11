@@ -5,13 +5,24 @@ import (
 
 	"github.com/maxwellhealth/bongo"
 	"github.com/univedo/api2go"
-	"labix.org/v2/mgo/bson"
+	"gopkg.in/mgo.v2/bson"
 )
 
 //User is a generic database user
 type User struct {
 	ID       bson.ObjectId `bson:"_id"`
 	Username string
+	exists   bool
+}
+
+//SetIsNew satisfies the document base
+func (u *User) SetIsNew(isNew bool) {
+	u.exists = !isNew
+}
+
+//IsNew satisfies the document base
+func (u *User) IsNew() bool {
+	return !u.exists
 }
 
 //GetId Satisfy the document interface
@@ -111,5 +122,7 @@ func (s *UserSource) Delete(id string) error {
 
 //Update stores all changes on the user
 func (s *UserSource) Update(obj interface{}) error {
-	return errors.New("not implemented")
+	//create and update are the same method in a odm
+	_, err := s.Create(obj)
+	return err
 }

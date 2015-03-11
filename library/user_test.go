@@ -46,6 +46,27 @@ var _ = Describe("User", func() {
 			Expect(id).To(Equal(castedUser.GetId().Hex()))
 		})
 
+		It("Should create a new user and update him", func() {
+			By("storing it")
+			user := User{Username: "Unittest"}
+			id, err := userSource.Create(user)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(id).ToNot(Equal(""))
+
+			By("renaming him")
+			user.Username = "New Unittest"
+			err = userSource.Update(user)
+			Expect(err).ToNot(HaveOccurred())
+
+			By("retrieving him from the database")
+			after, err := userSource.FindOne(id, request)
+			Expect(err).ToNot(HaveOccurred())
+			castedUser, ok := after.(User)
+			Expect(ok).To(Equal(true))
+			Expect(id).To(Equal(castedUser.GetId().Hex()))
+			Expect(castedUser.Username).To(Equal("New Unittest"))
+		})
+
 		It("Should find zero users", func() {
 			resultSet, err := userSource.FindAll(request)
 			Expect(err).ToNot(HaveOccurred())

@@ -6,6 +6,8 @@ services: mongodb
 
 install:
   - go get github.com/tools/godep
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/onsi/gomeg 
 
 script:
-  - cd library && godep go test
+  - ginkgo -r
