@@ -7,5 +7,9 @@
     "grunt-contrib-less": "*",
     "grunt-contrib-copy": "*",
     "grunt-contrib-watch": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/manyminds/soyfr.git"
   }
 }
