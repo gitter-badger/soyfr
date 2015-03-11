@@ -1,3 +1,5 @@
-app/public/bower
-node_modules
 .idea/
+node_modules
+app/public/css
+app/public/bower
+app/public/fonts
