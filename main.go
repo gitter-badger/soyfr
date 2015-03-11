@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/manyminds/soyfer/library"
+	"github.com/manyminds/soyfr/library"
 	"github.com/maxwellhealth/bongo"
 	"github.com/univedo/api2go"
 )
