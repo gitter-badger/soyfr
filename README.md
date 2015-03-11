@@ -7,6 +7,4 @@ a crowd based party drinking game
 brew install mongo
 bower install
 npm install
-npm install -g grunt-cli
-
 ```
