@@ -29,12 +29,23 @@ type UserSource struct {
 	Connection *bongo.Connection
 }
 
+//FindAll satisfies api2go data source interface
 func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
-	// Return a slice of all posts as []Post
+	user := User{}
+	resultSet := s.Connection.Collection("user").Find(bson.M{})
 	var users []User
+	if resultSet.Error != nil {
+		return users, resultSet.Error
+	}
+
+	for resultSet.Next(&user) {
+		users = append(users, user)
+	}
+
 	return users, nil
 }
 
+//FindOne satisfies api2go data source interface
 func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
 	user := User{}
 	err := s.Connection.Collection("user").FindById(bson.ObjectIdHex(ID), &user)
@@ -42,6 +53,7 @@ func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
 	return user, err
 }
 
+//FindMultiple satifies api2go data source interface
 func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, error) {
 	// Return multiple posts by ID as []Post
 	// For example for Requests like GET /posts/1,2,3
@@ -49,6 +61,7 @@ func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, 
 	return users, errors.New("not implemented")
 }
 
+//Create satisfies api2go create interface
 func (s *UserSource) Create(obj interface{}) (string, error) {
 	user, ok := obj.(User)
 	if !ok {
