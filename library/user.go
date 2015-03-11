@@ -31,9 +31,10 @@ type UserSource struct {
 
 //FindAll satisfies api2go data source interface
 func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
-	user := User{}
-	resultSet := s.Connection.Collection("user").Find(bson.M{})
 	var users []User
+	user := User{}
+	//TODO introduce paging
+	resultSet := s.Connection.Collection("user").Find(bson.M{})
 	if resultSet.Error != nil {
 		return users, resultSet.Error
 	}
@@ -55,10 +56,26 @@ func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
 
 //FindMultiple satifies api2go data source interface
 func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, error) {
-	// Return multiple posts by ID as []Post
-	// For example for Requests like GET /posts/1,2,3
 	var users []User
-	return users, errors.New("not implemented")
+	user := User{}
+
+	var findQuery []bson.ObjectId
+
+	for _, s := range IDs {
+		findQuery = append(findQuery, bson.ObjectIdHex(s))
+	}
+
+	//TODO introduce paging
+	resultSet := s.Connection.Collection("user").Find(bson.M{"_id": bson.M{"$in": findQuery}})
+	if resultSet.Error != nil {
+		return users, resultSet.Error
+	}
+
+	for resultSet.Next(&user) {
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 //Create satisfies api2go create interface

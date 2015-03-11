@@ -1,6 +1,10 @@
 package library_test
 
 import (
+	"fmt"
+	"math/rand"
+	"time"
+
 	. "github.com/manyminds/soyfr/library"
 	"github.com/maxwellhealth/bongo"
 	. "github.com/onsi/ginkgo"
@@ -14,6 +18,7 @@ var _ = Describe("User", func() {
 	var request api2go.Request
 
 	BeforeEach(func() {
+		rand.Seed(time.Now().UnixNano())
 		var err error
 		config := bongo.Config{
 			ConnectionString: "localhost",
@@ -64,6 +69,32 @@ var _ = Describe("User", func() {
 			data, ok := resultSet.([]User)
 			Expect(ok).To(Equal(true))
 			Expect(data).To(HaveLen(3))
+		})
+
+		It("Should find some added users", func() {
+			maxUsers := 100
+			var idsToFind []string
+			var i int
+
+			for i < maxUsers {
+				i++
+				user := User{Username: fmt.Sprintf("user_%d", i)}
+				idString, err := userSource.Create(user)
+				Expect(err).ToNot(HaveOccurred())
+
+				if rand.Int()%2 == 0 {
+					idsToFind = append(idsToFind, idString)
+				}
+			}
+
+			By(fmt.Sprintf("Finding %d users", len(idsToFind)))
+
+			resultSet, err := userSource.FindMultiple(idsToFind, request)
+			Expect(err).ToNot(HaveOccurred())
+
+			data, ok := resultSet.([]User)
+			Expect(ok).To(Equal(true))
+			Expect(data).To(HaveLen(len(idsToFind)))
 		})
 	})
 
