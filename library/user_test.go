@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/univedo/api2go"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var _ = Describe("User", func() {
@@ -46,12 +47,13 @@ var _ = Describe("User", func() {
 			Expect(id).To(Equal(castedUser.GetId().Hex()))
 		})
 
-		PIt("Should create a new user and update him", func() {
+		It("Should create a new user and update him", func() {
 			By("storing it")
 			user := User{Username: "Unittest"}
 			id, err := userSource.Create(user)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(id).ToNot(Equal(""))
+			user.ID = bson.ObjectIdHex(id)
 
 			By("renaming him")
 			user.Username = "New Unittest"
