@@ -36,7 +36,7 @@ var _ = Describe("User", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("test create via api", func() {
+	Context("test crud via api", func() {
 		var server *httptest.Server
 		BeforeEach(func() {
 			server = httptest.NewServer((bootstrapAPI(getDatabaseConfiguration())))
