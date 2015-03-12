@@ -46,7 +46,7 @@ var _ = Describe("User", func() {
 			Expect(id).To(Equal(castedUser.GetId().Hex()))
 		})
 
-		It("Should create a new user and update him", func() {
+		PIt("Should create a new user and update him", func() {
 			By("storing it")
 			user := User{Username: "Unittest"}
 			id, err := userSource.Create(user)
