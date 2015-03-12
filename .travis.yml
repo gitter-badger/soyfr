@@ -7,7 +7,7 @@ services: mongodb
 install:
   - go get github.com/tools/godep
   - go get github.com/onsi/ginkgo/ginkgo
-  - go get github.com/onsi/gomeg 
+  - go get github.com/onsi/gomega 
 
 script:
   - ginkgo -r
