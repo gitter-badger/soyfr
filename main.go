@@ -5,7 +5,6 @@ import (
 
 	"github.com/manyminds/soyfr/library"
 	"github.com/maxwellhealth/bongo"
-	"github.com/univedo/api2go"
 )
 
 func main() {
@@ -15,13 +14,5 @@ func main() {
 		Database:         "soyfer",
 	}
 
-	usersource, err := library.CreateUserSource(&config)
-
-	if err != nil {
-		panic(err)
-	}
-
-	api := api2go.NewAPI("v1")
-	api.AddResource(library.User{}, userSource)
-	http.ListenAndServe(":8080", api.Handler())
+	http.ListenAndServe(":8080", library.bootstrapAPI(&config))
 }

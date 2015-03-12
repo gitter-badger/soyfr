@@ -1,4 +1,4 @@
-package library_test
+package library
 
 import (
 	"github.com/maxwellhealth/bongo"

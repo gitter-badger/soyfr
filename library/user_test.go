@@ -1,11 +1,13 @@
-package library_test
+package library
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"net/http/httptest"
 	"time"
 
-	. "github.com/manyminds/soyfr/library"
 	"github.com/maxwellhealth/bongo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,6 +18,17 @@ import (
 var _ = Describe("User", func() {
 	var userSource *UserSource
 	var request api2go.Request
+
+	getBodyFromURL := func(URL string) string {
+		resp, err := http.Get(URL)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		body, err := ioutil.ReadAll(resp.Body)
+		Expect(err).ToNot(HaveOccurred())
+		stringBody := string(body)
+		return stringBody
+	}
+
 	BeforeEach(func() {
 		rand.Seed(time.Now().UnixNano())
 		var err error
@@ -23,7 +36,18 @@ var _ = Describe("User", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("basic user crud api methods", func() {
+	Context("test create via api", func() {
+		var server *httptest.Server
+		BeforeEach(func() {
+			server = httptest.NewServer((bootstrapAPI(getDatabaseConfiguration())))
+		})
+
+		It("Should be able to list users", func() {
+			Expect(getBodyFromURL(server.URL + "/v1/users")).To(MatchJSON("{\"data\":[]}"))
+		})
+	})
+
+	Context("basic user crud model methods", func() {
 		It("Should create a new user", func() {
 			By("storing it")
 			user := User{Username: "Unittest"}
