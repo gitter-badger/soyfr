@@ -15,16 +15,13 @@ func main() {
 		Database:         "soyfer",
 	}
 
-	connection, err := bongo.Connect(&config)
+	usersource, err := library.CreateUserSource(&config)
+
 	if err != nil {
 		panic(err)
 	}
 
-	//TODO hide connection in construct
-	userSource := library.UserSource{Connection: connection}
-
 	api := api2go.NewAPI("v1")
-	api.AddResource(library.User{}, &userSource)
+	api.AddResource(library.User{}, userSource)
 	http.ListenAndServe(":8080", api.Handler())
-
 }

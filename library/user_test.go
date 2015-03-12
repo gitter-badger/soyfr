@@ -14,22 +14,13 @@ import (
 )
 
 var _ = Describe("User", func() {
-	var connection *bongo.Connection
-	var userSource UserSource
+	var userSource *UserSource
 	var request api2go.Request
-
 	BeforeEach(func() {
 		rand.Seed(time.Now().UnixNano())
 		var err error
-		config := bongo.Config{
-			ConnectionString: "localhost",
-			Database:         "soyfer_test",
-		}
-
-		connection, err = bongo.Connect(&config)
+		userSource, err = CreateUserSource(getDatabaseConfiguration())
 		Expect(err).ToNot(HaveOccurred())
-
-		userSource = UserSource{Connection: connection}
 	})
 
 	Context("basic user crud api methods", func() {
@@ -122,6 +113,8 @@ var _ = Describe("User", func() {
 	})
 
 	AfterEach(func() {
-		connection.Session.DB("soyfer_test").DropDatabase()
+		if con, err := bongo.Connect(getDatabaseConfiguration()); err == nil {
+			con.Session.DB("soyfer_test").DropDatabase()
+		}
 	})
 })

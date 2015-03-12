@@ -37,7 +37,18 @@ func (u *User) SetId(id bson.ObjectId) {
 
 //UserSource for api2go
 type UserSource struct {
-	Connection *bongo.Connection
+	connection *bongo.Connection
+}
+
+//CreateUserSource returns a configured and connected user source
+// an error on failed connection
+func CreateUserSource(config *bongo.Config) (*UserSource, error) {
+	connection, err := bongo.Connect(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserSource{connection: connection}, nil
 }
 
 //FindAll satisfies api2go data source interface
@@ -45,7 +56,7 @@ func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
 	var users []User
 	user := User{}
 	//TODO introduce paging
-	resultSet := s.Connection.Collection("user").Find(bson.M{})
+	resultSet := s.connection.Collection("user").Find(bson.M{})
 	if resultSet.Error != nil {
 		return users, resultSet.Error
 	}
@@ -60,7 +71,7 @@ func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
 //FindOne satisfies api2go data source interface
 func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
 	user := User{}
-	err := s.Connection.Collection("user").FindById(bson.ObjectIdHex(ID), &user)
+	err := s.connection.Collection("user").FindById(bson.ObjectIdHex(ID), &user)
 
 	return user, err
 }
@@ -77,7 +88,7 @@ func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, 
 	}
 
 	//TODO introduce paging
-	resultSet := s.Connection.Collection("user").Find(bson.M{"_id": bson.M{"$in": findQuery}})
+	resultSet := s.connection.Collection("user").Find(bson.M{"_id": bson.M{"$in": findQuery}})
 	if resultSet.Error != nil {
 		return users, resultSet.Error
 	}
@@ -96,7 +107,7 @@ func (s *UserSource) Create(obj interface{}) (string, error) {
 		return "", errors.New("Invalid instance given")
 	}
 
-	err := s.Connection.Collection("user").Save(&user)
+	err := s.connection.Collection("user").Save(&user)
 
 	if err != nil {
 		return "", err
@@ -117,7 +128,7 @@ func (s *UserSource) Delete(id string) error {
 		return errors.New("Invalid instance given")
 	}
 
-	return s.Connection.Collection("user").Delete(&user)
+	return s.connection.Collection("user").Delete(&user)
 }
 
 //Update stores all changes on the user
