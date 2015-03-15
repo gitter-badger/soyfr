@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "bootstrap": "*",
-    "app-router": "*"
+    "app-router": "*",
+    "polymer": "Polymer/polymer#~0.5.5"
   }
 }
