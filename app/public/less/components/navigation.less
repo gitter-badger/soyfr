@@ -1,0 +1,42 @@
+core-header-panel {
+    background: white;
+}
+
+core-toolbar {
+    background-color: #03A9F4;
+}
+
+.logo {
+    font-weight: bold;
+    color: white;
+}
+
+[drawer] {
+    core-toolbar {
+        background-color: #2fb2cf;
+    }
+
+    background-color: #2a2d33;
+
+    core-item {
+        color: #ffffff;
+    }
+}
+
+[main] {
+    core-toolbar {
+        background-color: #ffffff;
+    }
+
+    background-color: white;
+}
+
+.content {
+    padding: 20px;
+}
+
+/* drawer is always visible on a wide screen
+   so menu button isn't required */
+core-drawer-panel:not([narrow]) #navicon {
+    display: none;
+}
