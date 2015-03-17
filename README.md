@@ -10,3 +10,14 @@ brew install mongo
 bower install
 npm install
 ```
+
+#running the application
+in order to run the application you need to compile frontend 
+files with grunt and after that start the go server. 
+
+```
+grunt
+godep go run main.go
+```
+
+the application can now be reached via [0.0.0.0:8080](http://0.0.0.0:8080).
