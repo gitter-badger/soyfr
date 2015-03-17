@@ -20,4 +20,9 @@ grunt
 godep go run main.go
 ```
 
-the application can now be reached via [0.0.0.0:8080](http://0.0.0.0:8080).
+#get command line options
+```
+godep go run main.go -help
+```
+
+the application can now be reached via [0.0.0.0:8800](http://0.0.0.0:8800).
