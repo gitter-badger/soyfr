@@ -12,8 +12,8 @@
 		},
 		{
 			"ImportPath": "github.com/maxwellhealth/bongo",
-			"Comment": "v0.9.3",
-			"Rev": "60879a17068ee5f4eec1ee8d556ed3dbc9b79a94"
+			"Comment": "v0.9.4",
+			"Rev": "b88abb2a30a14fe626ab0798fada8decb56606f8"
 		},
 		{
 			"ImportPath": "github.com/maxwellhealth/go-dotaccess",

@@ -128,7 +128,7 @@ func (s *UserSource) Delete(id string) error {
 		return errors.New("Invalid instance given")
 	}
 
-	return s.connection.Collection("user").Delete(&user)
+	return s.connection.Collection("user").DeleteDocument(&user)
 }
 
 //Update stores all changes on the user

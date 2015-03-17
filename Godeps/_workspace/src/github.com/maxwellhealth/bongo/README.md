@@ -3,6 +3,22 @@ We couldn't find a good ODM for MongoDB written in Go, so we made one. Bongo is 
 
 Bongo is tested using the fantasic GoConvey (https://github.com/smartystreets/goconvey)
 
+[![Build Status](https://travis-ci.org/maxwellhealth/bongo.svg)](https://travis-ci.org/maxwellhealth/bongo)
+
+[![Coverage Status](https://coveralls.io/repos/maxwellhealth/bongo/badge.svg)](https://coveralls.io/r/maxwellhealth/bongo)
+
+# Stablity
+
+Since we're not yet at a major release, some things in the API might change. Here's a list:
+
+* Save - stable
+* Find/FindOne/FindById - stable
+* Delete - stable
+* Save/Delete/Find/Validation hooks - stable
+* Cascade - unstable (might need a refactor)
+* Change Tracking - stable
+* Validation methods - stable
+
 # Usage
 
 ## Basic Usage
@@ -41,7 +57,6 @@ Any struct can be used as a document as long as it satisfies the `Document` inte
 For example:
 
 ```go
-
 type Person struct {
 	bongo.DocumentBase `bson:",inline"`
 	FirstName string
@@ -53,8 +68,6 @@ type Person struct {
 You can use child structs as well.
 
 ```go
-
-
 type Person struct {
 	bongo.DocumentBase `bson:",inline"`
 	FirstName string
@@ -66,7 +79,7 @@ type Person struct {
 		City string
 		State string
 		Zip string
-	} 
+	}
 }
 ```
 
@@ -74,7 +87,7 @@ type Person struct {
 
 You can add special methods to your document type that will automatically get called by bongo during certain actions. Hooks get passed the current `*bongo.Collection` so you can avoid having to couple them with your actual database layer. Currently available hooks are:
 
-* `func (s *ModelStruct) Validate(*bongo.Collection) []string` (returns a slice of errors - if it is empty then it is assumed that validation succeeded)
+* `func (s *ModelStruct) Validate(*bongo.Collection) []error` (returns a slice of errors - if it is empty then it is assumed that validation succeeded)
 * `func (s *ModelStruct) BeforeSave(*bongo.Collection) error`
 * `func (s *ModelStruct) AfterSave(*bongo.Collection) error`
 * `func (s *ModelStruct) BeforeDelete(*bongo.Collection) error`
@@ -106,9 +119,28 @@ if vErr, ok := err.(*bongo.ValidationError); ok {
 
 ### Deleting Documents
 
-Same thing as `Save` - just call `Delete` on the collection and pass the document instance.
+There are three ways to delete a document.
+
+#### DeleteDocument
+Same thing as `Save` - just call `DeleteDocument` on the collection and pass the document instance.
 ```go
-err := connection.Collection("people").Delete(person)
+err := connection.Collection("people").DeleteDocument(person)
+```
+
+This *will* run the `BeforeDelete` and `AfterDelete` hooks, if applicable.
+
+#### DeleteOne
+This just delegates to `mgo.Collection.Remove`. It will *not* run the `BeforeDelete` and `AfterDelete` hooks.
+
+```go
+err := connection.Collection("people").DeleteOne(bson.M{"FirstName":"Testy"})
+```
+
+#### Delete
+This delegates to `mgo.Collection.RemoveAll`. It will *not* run the `BeforeDelete` and `AfterDelete` hooks.
+```go
+changeInfo, err := connection.Collection("people").Delete(bson.M{"FirstName":"Testy"})
+fmt.Printf("Deleted %d documents", changeInfo.Removed)
 ```
 
 
@@ -147,7 +179,7 @@ for results.Next(person) {
 }
 ```
 
-To paginate, you can run `Paginate(perPage int, currentPage int)` on the result of `connection.Find()`. That will return an instance of `bongo.PaginationInfo`, with properties like `TotalRecords`, `RecordsOnPage`, etc. 
+To paginate, you can run `Paginate(perPage int, currentPage int)` on the result of `connection.Find()`. That will return an instance of `bongo.PaginationInfo`, with properties like `TotalRecords`, `RecordsOnPage`, etc.
 
 To use additional functions like `sort`, `skip`, `limit`, etc, you can access the underlying mgo `Query` via `ResultSet.Query`.
 
@@ -229,7 +261,7 @@ If you are going to be checking more than one field, you should instantiate a ne
 ## Cascade Save/Delete
 Bongo supports cascading portions of documents to related documents and the subsequent cleanup upon deletion. For example, if you have a `Team` collection, and each team has an array of `Players`, you can cascade a player's first name and last name to his or her `team.Players` array on save, and remove that element in the array if you delete the player.
 
-To use this feature, your struct needs to have an exported method called `GetCascade`, which returns an array of `*bongo.CascadeConfig`. Additionally, if you want to make use of the `OldQuery` property to remove references from previously related documents, you should probably alsotimplement the `DiffTracker` on your model struct (see above). 
+To use this feature, your struct needs to have an exported method called `GetCascade`, which returns an array of `*bongo.CascadeConfig`. Additionally, if you want to make use of the `OldQuery` property to remove references from previously related documents, you should probably alsotimplement the `DiffTracker` on your model struct (see above).
 
 You can also leave `ThroughProp` blank, in which case the properties of the document will be cascaded directly onto the related document. This is useful when you want to cascade `ObjectId` properties or other references, but it is important that you keep in mind that these properties will be nullified on the related document when the main doc is deleted or changes references.
 
@@ -255,7 +287,7 @@ type CascadeConfig struct {
 
 	// Properties that will be cascaded/deleted. Can (should) be in dot notation for nested properties. This is used to nullify properties when there is an OldQuery or if the document is deleted.
 	Properties []string
-	
+
 	// The actual data that will be cascade
 	Data interface{}
 }
