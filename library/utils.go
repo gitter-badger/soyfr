@@ -7,8 +7,8 @@ import (
 	"github.com/univedo/api2go"
 )
 
-//bootstrapAPI configures the api and returns the corresponding handler
-func bootstrapAPI(config *bongo.Config) http.Handler {
+//BootstrapAPI configures the api and returns the corresponding handler
+func BootstrapAPI(config *bongo.Config) http.Handler {
 	userSource, err := CreateUserSource(config)
 
 	if err != nil {

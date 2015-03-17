@@ -14,5 +14,5 @@ func main() {
 		Database:         "soyfer",
 	}
 
-	http.ListenAndServe(":8080", library.bootstrapAPI(&config))
+	http.ListenAndServe(":8080", library.BootstrapAPI(&config))
 }

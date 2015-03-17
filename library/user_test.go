@@ -39,7 +39,7 @@ var _ = Describe("User", func() {
 	Context("test crud via api", func() {
 		var server *httptest.Server
 		BeforeEach(func() {
-			server = httptest.NewServer((bootstrapAPI(getDatabaseConfiguration())))
+			server = httptest.NewServer((BootstrapAPI(getDatabaseConfiguration())))
 		})
 
 		It("Should be able to list users", func() {
