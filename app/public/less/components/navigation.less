@@ -35,6 +35,19 @@ core-toolbar {
     padding: 20px;
 }
 
+paper-tabs {
+    color: #ffffff;
+    background-color: #2fb2cf;
+}
+
+paper-tabs::shadow #selectionBar {
+    background-color: darken(#2fb2cf, 20%);
+}
+
+paper-tabs paper-tab::shadow #ink {
+    color: darken(#2fb2cf, 20%);
+}
+
 /* drawer is always visible on a wide screen
    so menu button isn't required */
 core-drawer-panel:not([narrow]) #navicon {

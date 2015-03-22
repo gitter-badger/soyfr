@@ -1,0 +1,30 @@
+<link href="../../public/bower/polymer/polymer.html" rel="import">
+<link href="../../public/bower/paper-input/paper-input.html" rel="import">
+<link href="../../public/bower/paper-button/paper-button.html" rel="import">
+
+<polymer-element name="soyfr-registration">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: relative;
+                padding: 20px;
+            }
+        </style>
+        <div class="username-input">
+            <paper-input-decorator label="Username" floatingLabel required>
+                <input is="core-input" type="text">
+            </paper-input-decorator>
+        </div>
+        <div class="password-input">
+            <paper-input-decorator label="Password" floatingLabel>
+                <input is="core-input" type="password">
+            </paper-input-decorator>
+        </div>
+        <paper-button label="Register" role="button">Register</paper-button>
+    </template>
+
+    <script>
+        Polymer({});
+    </script>
+</polymer-element>
