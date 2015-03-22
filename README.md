@@ -7,8 +7,9 @@ a crowd based party drinking game
 
 ```
 brew install mongo
-bower install
 npm install
+bower install
+godep get
 ```
 
 #running the application
