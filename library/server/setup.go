@@ -102,6 +102,8 @@ func GetApplication() *cli.App {
 		distPath := c.String("resourceDirectory")
 		serverPort := c.Int("port")
 
+		log.Printf("Mongo connection on %s\n", connectionString)
+
 		startApplication(connectionString, database, distPath, serverPort)
 	}
 
