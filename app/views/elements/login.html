@@ -4,7 +4,7 @@
 <link href="../../public/bower/core-ajax/core-ajax.html" rel="import">
 <link href="../../public/bower/paper-toast/paper-toast.html" rel="import">
 
-<polymer-element name="soyfr-registration" attributes="url">
+<polymer-element name="soyfr-login" attributes="url">
     <template>
         <style>
             :host {
@@ -42,7 +42,7 @@
     </template>
 
     <script>
-        Polymer('soyfr-registration', {
+        Polymer('soyfr-login', {
             doSend: function () {
                 this.$.registrationForm.go();
             },

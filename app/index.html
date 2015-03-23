@@ -9,6 +9,7 @@
 
     <link rel="import" href="./views/elements/navigation.html"/>
     <link rel="import" href="./views/elements/registration.html">
+    <link rel="import" href="./views/elements/login.html">
 </head>
 <body fullbleed layout>
     <core-drawer-panel id="drawerPanel">
@@ -39,7 +40,8 @@
                         <soyfr-registration class="registration" url="/api/v1/users"></soyfr-registration>
                     </section>
                     <section data-route="login">
-                        login
+                        <!-- TODO: add url for login -->
+                        <soyfr-login class="registration" url="#"></soyfr-login>
                     </section>
                 </core-pages>
             </template>
