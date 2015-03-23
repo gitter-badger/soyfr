@@ -2,10 +2,11 @@
   "name": "soyfr",
   "author": "manyminds",
   "devDependencies": {
-    "grunt": "*",
     "bower": "*",
-    "grunt-contrib-less": "*",
+    "grunt": "*",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-copy": "*",
+    "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*"
   },
   "repository": {
