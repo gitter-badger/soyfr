@@ -8,7 +8,7 @@
     <link rel="import" href="./views/elements/navigation.html"/>
     <link rel="import" href="./views/elements/registration.html">
 </head>
-<body fullbleed layout vertical>
+<body fullbleed layout>
     <core-drawer-panel id="drawerPanel">
         <core-header-panel drawer>
             <core-toolbar class="logo" horizontal center-justified layout>
@@ -24,6 +24,10 @@
         <core-header-panel main>
             <core-toolbar>
                 <core-icon-button id="navicon" icon="menu"></core-icon-button>
+                <div class="navigation-toolbar-logo">
+                    <core-icon icon="dashboard"></core-icon>
+                    Soyfr
+                </div>
             </core-toolbar>
             <paper-tabs>
                 <paper-tab>Register</paper-tab>
