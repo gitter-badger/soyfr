@@ -26,7 +26,8 @@
 		},
 		{
 			"ImportPath": "github.com/univedo/api2go",
-			"Rev": "0aa861321b70f1a4569e44a30fdd6b7fad616a74"
+			"Comment": "0.1-31-g1e11ad4",
+			"Rev": "1e11ad4466c50c4a195c9e43fd63500ac5fb34f3"
 		},
 		{
 			"ImportPath": "gopkg.in/mgo.v2",

@@ -12,17 +12,66 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/univedo/api2go/jsonapi"
 	"gopkg.in/guregu/null.v2"
 )
 
 type Post struct {
-	ID          string
-	Title       string
-	Value       null.Float
-	Author      *User
-	AuthorID    string
-	Comments    []Comment
-	CommentsIDs []string
+	ID       string
+	Title    string
+	Value    null.Float
+	Author   *User     `json:"-"`
+	Comments []Comment `json:"-"`
+}
+
+func (p Post) GetID() string {
+	return p.ID
+}
+
+func (p *Post) SetID(ID string) error {
+	p.ID = ID
+	return nil
+}
+
+func (p Post) GetReferences() []jsonapi.Reference {
+	return []jsonapi.Reference{
+		{
+			Name: "author",
+			Type: "users",
+		},
+		{
+			Name: "comments",
+			Type: "comments",
+		},
+	}
+}
+
+func (p Post) GetReferencedIDs() []jsonapi.ReferenceID {
+	result := []jsonapi.ReferenceID{}
+	if p.Author != nil {
+		result = append(result, jsonapi.ReferenceID{ID: p.Author.GetID(), Name: "author", Type: "users"})
+	}
+	for _, comment := range p.Comments {
+		result = append(result, jsonapi.ReferenceID{ID: comment.GetID(), Name: "comments", Type: "comments"})
+	}
+
+	return result
+}
+
+func (p *Post) SetReferencedIDs(IDs []jsonapi.ReferenceID) error {
+	return nil
+}
+
+func (p Post) GetReferencedStructs() []jsonapi.MarshalIdentifier {
+	result := []jsonapi.MarshalIdentifier{}
+	if p.Author != nil {
+		result = append(result, *p.Author)
+	}
+	for key := range p.Comments {
+		result = append(result, p.Comments[key])
+	}
+
+	return result
 }
 
 type Comment struct {
@@ -30,9 +79,17 @@ type Comment struct {
 	Value string
 }
 
+func (c Comment) GetID() string {
+	return c.ID
+}
+
 type User struct {
 	ID   string
 	Name string
+}
+
+func (u User) GetID() string {
+	return u.ID
 }
 
 type fixtureSource struct {
@@ -262,14 +319,14 @@ var _ = Describe("RestHandler", func() {
 				"value": nil,
 				"links": map[string]interface{}{
 					"author": map[string]interface{}{
-						"id":       "1",
-						"type":     "users",
-						"resource": "/posts/1/author",
+						"id":   "1",
+						"type": "users",
+						//"resource": "/v1/posts/1/author",
 					},
 					"comments": map[string]interface{}{
-						"ids":      []interface{}{"1"},
-						"type":     "comments",
-						"resource": "/posts/1/comments",
+						"ids":  []string{"1"},
+						"type": "comments",
+						//"resource": "/v1/posts/1/comments",
 					},
 				},
 			}
@@ -294,13 +351,12 @@ var _ = Describe("RestHandler", func() {
 				"value": nil,
 				"links": map[string]interface{}{
 					"author": map[string]interface{}{
-						"type":     "users",
-						"resource": "/posts/2/author",
+						"type": "users",
+						//"resource": "/v1/posts/2/author",
 					},
 					"comments": map[string]interface{}{
-						"ids":      []interface{}{},
-						"type":     "comments",
-						"resource": "/posts/2/comments",
+						"type": "comments",
+						//"resource": "/v1/posts/2/comments",
 					},
 				},
 			}
@@ -312,18 +368,17 @@ var _ = Describe("RestHandler", func() {
 				"value": nil,
 				"links": map[string]interface{}{
 					"author": map[string]interface{}{
-						"type":     "users",
-						"resource": "/posts/3/author",
+						"type": "users",
+						//"resource": "/v1/posts/3/author",
 					},
 					"comments": map[string]interface{}{
-						"ids":      []interface{}{},
-						"type":     "comments",
-						"resource": "/posts/3/comments",
+						"type": "comments",
+						//"resource": "/v1/posts/3/comments",
 					},
 				},
 			}
 
-			api = NewAPI("")
+			api = NewAPI("v1")
 			api.AddResource(Post{}, source)
 			api.AddResource(User{}, &userSource{})
 			api.AddResource(Comment{}, &commentSource{})
@@ -332,12 +387,12 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("GETs collections", func() {
-			req, err := http.NewRequest("GET", "/posts", nil)
+			req, err := http.NewRequest("GET", "/v1/posts", nil)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
 			expected, err := json.Marshal(map[string]interface{}{
-				"data":   []interface{}{post1Json, post2Json, post3Json},
+				"data":   []map[string]interface{}{post1Json, post2Json, post3Json},
 				"linked": post1LinkedJSON,
 			})
 			Expect(err).ToNot(HaveOccurred())
@@ -345,7 +400,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("GETs single objects", func() {
-			req, err := http.NewRequest("GET", "/posts/1", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/1", nil)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
@@ -358,7 +413,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("GETs multiple objects", func() {
-			req, err := http.NewRequest("GET", "/posts/1,2", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/1,2", nil)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
@@ -371,7 +426,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("GETs related struct from resource url", func() {
-			req, err := http.NewRequest("GET", "/posts/1/author", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/1/author", nil)
 			Expect(err).ToNot(HaveOccurred())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
@@ -379,7 +434,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("GETs related structs from resource url", func() {
-			req, err := http.NewRequest("GET", "/posts/1/comments", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/1/comments", nil)
 			Expect(err).ToNot(HaveOccurred())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusOK))
@@ -387,7 +442,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("Gets 404 if a related struct was not found", func() {
-			req, err := http.NewRequest("GET", "/posts/1/unicorns", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/1/unicorns", nil)
 			Expect(err).ToNot(HaveOccurred())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusNotFound))
@@ -395,7 +450,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("404s", func() {
-			req, err := http.NewRequest("GET", "/posts/23", nil)
+			req, err := http.NewRequest("GET", "/v1/posts/23", nil)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusNotFound))
@@ -404,12 +459,12 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("POSTSs new objects", func() {
-			reqBody := strings.NewReader(`{"posts": [{"title": "New Post"}]}`)
-			req, err := http.NewRequest("POST", "/posts", reqBody)
+			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "type": "posts"}]}`)
+			req, err := http.NewRequest("POST", "/v1/posts", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusCreated))
-			Expect(rec.Header().Get("Location")).To(Equal("/posts/4"))
+			Expect(rec.Header().Get("Location")).To(Equal("/v1/posts/4"))
 			var result map[string]interface{}
 			Expect(json.Unmarshal(rec.Body.Bytes(), &result)).To(BeNil())
 			Expect(result).To(Equal(map[string]interface{}{
@@ -420,22 +475,39 @@ var _ = Describe("RestHandler", func() {
 					"value": nil,
 					"links": map[string]interface{}{
 						"author": map[string]interface{}{
-							"type":     "users",
-							"resource": "/posts/4/author",
+							"type": "users",
+							//"resource": "/v1/posts/4/author",
 						},
 						"comments": map[string]interface{}{
-							"ids":      []interface{}{},
-							"type":     "comments",
-							"resource": "/posts/4/comments",
+							"type": "comments",
+							//"resource": "/v1/posts/4/comments",
 						},
 					},
 				},
 			}))
 		})
 
+		It("POSTSs new objects with trailing slash automatic redirect enabled", func() {
+			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "types"; "posts"}]}`)
+			req, err := http.NewRequest("POST", "/v1/posts/", reqBody)
+			Expect(err).To(BeNil())
+			api.SetRedirectTrailingSlash(true)
+			api.Handler().ServeHTTP(rec, req)
+			Expect(rec.Code).To(Equal(http.StatusTemporaryRedirect))
+		})
+
+		It("POSTSs new objects with trailing slash automatic redirect disabled", func() {
+			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "types": "posts"}]}`)
+			req, err := http.NewRequest("POST", "/v1/posts/", reqBody)
+			Expect(err).To(BeNil())
+			api.SetRedirectTrailingSlash(false)
+			api.Handler().ServeHTTP(rec, req)
+			Expect(rec.Code).To(Equal(http.StatusNotFound))
+		})
+
 		It("POSTSs multiple objects", func() {
 			reqBody := strings.NewReader(`{"posts": [{"title": "New Post"}, {"title" : "Second New Post"}]}`)
-			req, err := http.NewRequest("POST", "/posts", reqBody)
+			req, err := http.NewRequest("POST", "/v1/posts", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusInternalServerError))
@@ -445,7 +517,7 @@ var _ = Describe("RestHandler", func() {
 
 		It("PUTSs multiple objects", func() {
 			reqBody := strings.NewReader(`{"posts": [{"title": "New Post"}, {"title" : "Second New Post"}]}`)
-			req, err := http.NewRequest("PUT", "/posts/1", reqBody)
+			req, err := http.NewRequest("PUT", "/v1/posts/1", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusInternalServerError))
@@ -454,7 +526,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("OPTIONS on collection route", func() {
-			req, err := http.NewRequest("OPTIONS", "/posts", nil)
+			req, err := http.NewRequest("OPTIONS", "/v1/posts", nil)
 			api.Handler().ServeHTTP(rec, req)
 			Expect(err).To(BeNil())
 			Expect(rec.Code).To(Equal(http.StatusNoContent))
@@ -462,7 +534,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("OPTIONS on element route", func() {
-			req, err := http.NewRequest("OPTIONS", "/posts/1", nil)
+			req, err := http.NewRequest("OPTIONS", "/v1/posts/1", nil)
 			api.Handler().ServeHTTP(rec, req)
 			Expect(err).To(BeNil())
 			Expect(rec.Code).To(Equal(http.StatusNoContent))
@@ -470,7 +542,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("DELETEs", func() {
-			req, err := http.NewRequest("DELETE", "/posts/1", nil)
+			req, err := http.NewRequest("DELETE", "/v1/posts/1", nil)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusNoContent))
@@ -478,8 +550,8 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("UPDATEs", func() {
-			reqBody := strings.NewReader(`{"posts": {"id": "1", "title": "New Title"}}`)
-			req, err := http.NewRequest("PUT", "/posts/1", reqBody)
+			reqBody := strings.NewReader(`{"data": {"id": "1", "title": "New Title", "type": "posts"}}`)
+			req, err := http.NewRequest("PUT", "/v1/posts/1", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusNoContent))
@@ -487,93 +559,12 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("UPDATEs as array", func() {
-			reqBody := strings.NewReader(`{"posts": [{"id": "1", "title": "New Title"}]}`)
-			req, err := http.NewRequest("PUT", "/posts/1", reqBody)
+			reqBody := strings.NewReader(`{"data": [{"id": "1", "title": "New Title", "type": "posts"}]}`)
+			req, err := http.NewRequest("PUT", "/v1/posts/1", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusNoContent))
 			Expect(source.posts["1"].Title).To(Equal("New Title"))
-		})
-	})
-
-	Context("When using custom controller", func() {
-		var (
-			controller CustomController
-			source     *fixtureSource
-
-			api *API
-			rec *httptest.ResponseRecorder
-		)
-
-		BeforeEach(func() {
-			source = &fixtureSource{map[string]*Post{
-				"1": &Post{ID: "1", Title: "Hello, World!"},
-			}}
-
-			api = NewAPI("")
-			controller = CustomController{}
-			api.AddResourceWithController(Post{}, source, &controller)
-
-			rec = httptest.NewRecorder()
-		})
-
-		Describe("Controller called for", func() {
-			It("FindAll", func() {
-				req, err := http.NewRequest("GET", "/posts", nil)
-				Expect(err).To(BeNil())
-				api.Handler().ServeHTTP(rec, req)
-				Expect(rec.Code).To(Equal(http.StatusInternalServerError))
-				Expect(rec.Body.Bytes()).To(MatchJSON(controllerErrorJSON))
-			})
-
-			It("FindOne", func() {
-				req, err := http.NewRequest("GET", "/posts/1", nil)
-				Expect(err).To(BeNil())
-				api.Handler().ServeHTTP(rec, req)
-				Expect(rec.Code).To(Equal(http.StatusInternalServerError))
-				Expect(rec.Body.Bytes()).To(MatchJSON(controllerErrorJSON))
-			})
-
-			It("Create", func() {
-				reqBody := strings.NewReader(`{"posts": [{"title": "New Post"}]}`)
-				req, err := http.NewRequest("POST", "/posts", reqBody)
-				Expect(err).To(BeNil())
-				api.Handler().ServeHTTP(rec, req)
-				Expect(rec.Code).To(Equal(http.StatusInternalServerError))
-				Expect(rec.Body.Bytes()).To(MatchJSON(controllerErrorJSON))
-			})
-
-			It("Delete", func() {
-				reqBody := strings.NewReader("")
-				req, err := http.NewRequest("DELETE", "/posts/1", reqBody)
-				Expect(err).To(BeNil())
-				api.Handler().ServeHTTP(rec, req)
-				Expect(rec.Code).To(Equal(http.StatusInternalServerError))
-				Expect(rec.Body.Bytes()).To(MatchJSON(controllerErrorJSON))
-			})
-
-			It("Update", func() {
-				reqBody := strings.NewReader(`{"posts": [{"id": "1", "title": "New Post"}]}`)
-				req, err := http.NewRequest("PUT", "/posts/1", reqBody)
-				Expect(err).To(BeNil())
-				api.Handler().ServeHTTP(rec, req)
-				Expect(rec.Code).To(Equal(http.StatusInternalServerError))
-				Expect(rec.Body.Bytes()).To(MatchJSON(controllerErrorJSON))
-			})
-		})
-	})
-
-	Context("when prefixing routes", func() {
-		It("has correct Location when creating", func() {
-			api := NewAPI("v1")
-			api.AddResource(Post{}, &fixtureSource{map[string]*Post{}})
-			rec := httptest.NewRecorder()
-			reqBody := strings.NewReader(`{"posts": [{"title": "New Post"}]}`)
-			req, err := http.NewRequest("POST", "/v1/posts", reqBody)
-			Expect(err).To(BeNil())
-			api.Handler().ServeHTTP(rec, req)
-			Expect(rec.Code).To(Equal(http.StatusCreated))
-			Expect(rec.Header().Get("Location")).To(Equal("/v1/posts/1"))
 		})
 	})
 
@@ -604,7 +595,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("POSTSs new objects", func() {
-			reqBody := strings.NewReader(`{"posts": [{"title": ""}]}`)
+			reqBody := strings.NewReader(`{"data": [{"title": "", "type": "posts"}]}`)
 			req, err := http.NewRequest("POST", "/posts", reqBody)
 			Expect(err).To(BeNil())
 			api.Handler().ServeHTTP(rec, req)
@@ -638,13 +629,12 @@ var _ = Describe("RestHandler", func() {
 				"value": nil,
 				"links": map[string]interface{}{
 					"author": map[string]interface{}{
-						"type":     "users",
-						"resource": "/posts/1/author",
+						"type": "users",
+						//"resource": "/posts/1/author",
 					},
 					"comments": map[string]interface{}{
-						"ids":      []interface{}{},
-						"type":     "comments",
-						"resource": "/posts/1/comments",
+						"type": "comments",
+						//"resource": "/posts/1/comments",
 					},
 				},
 			}
@@ -656,13 +646,12 @@ var _ = Describe("RestHandler", func() {
 				"value": nil,
 				"links": map[string]interface{}{
 					"author": map[string]interface{}{
-						"type":     "users",
-						"resource": "/posts/2/author",
+						"type": "users",
+						//"resource": "/posts/2/author",
 					},
 					"comments": map[string]interface{}{
-						"ids":      []interface{}{},
-						"type":     "comments",
-						"resource": "/posts/2/comments",
+						"type": "comments",
+						//"resource": "/posts/2/comments",
 					},
 				},
 			}

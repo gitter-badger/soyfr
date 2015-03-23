@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/univedo/api2go/jsonapi"
 )
 
 // DataSource provides methods needed for CRUD.
@@ -31,25 +32,6 @@ type DataSource interface {
 
 	// Update an object
 	Update(obj interface{}) error
-}
-
-// Controller provides more customization of each route.
-// You can define a controller for every DataSource if needed
-type Controller interface {
-	// FindAll gets called after resource was called
-	FindAll(r *http.Request, objs *interface{}) error
-
-	// FindOne gets called after resource was called
-	FindOne(r *http.Request, obj *interface{}) error
-
-	// Create gets called before resource was called
-	Create(r *http.Request, obj *interface{}) error
-
-	// Delete gets called before resource was called
-	Delete(r *http.Request, id string) error
-
-	// Update gets called before resource was called
-	Update(r *http.Request, obj *interface{}) error
 }
 
 // API is a REST JSONAPI.
@@ -77,17 +59,27 @@ func NewAPI(prefix string) *API {
 	}
 }
 
+//SetRedirectTrailingSlash enables 307 redirects on urls ending with /
+//when disabled, an URL ending with / will 404
+func (api *API) SetRedirectTrailingSlash(enabled bool) {
+	if api.router == nil {
+		panic("router must not be nil")
+	}
+
+	api.router.RedirectTrailingSlash = enabled
+}
+
 // Request holds additional information for FindOne and Find Requests
 type Request struct {
-	QueryParams map[string][]string
-	Header      http.Header
+	PlainRequest *http.Request
+	QueryParams  map[string][]string
+	Header       http.Header
 }
 
 type resource struct {
 	resourceType reflect.Type
 	source       DataSource
 	name         string
-	controller   Controller
 }
 
 func (api *API) addResource(prototype interface{}, source DataSource) *resource {
@@ -96,7 +88,7 @@ func (api *API) addResource(prototype interface{}, source DataSource) *resource 
 		panic("pass an empty resource struct to AddResource!")
 	}
 
-	name := jsonify(pluralize(resourceType.Name()))
+	name := jsonapi.Jsonify(jsonapi.Pluralize(resourceType.Name()))
 	res := resource{
 		resourceType: resourceType,
 		name:         name,
@@ -166,15 +158,8 @@ func (api *API) AddResource(prototype interface{}, source DataSource) {
 	api.addResource(prototype, source)
 }
 
-// AddResourceWithController does the same as `AddResource` but also couples a custom `Controller`
-// Use this controller to implement access control and other things that depend on the request
-func (api *API) AddResourceWithController(prototype interface{}, source DataSource, controller Controller) {
-	res := api.addResource(prototype, source)
-	res.controller = controller
-}
-
 func buildRequest(r *http.Request) Request {
-	req := Request{}
+	req := Request{PlainRequest: r}
 	params := make(map[string][]string)
 	for key, values := range r.URL.Query() {
 		params[key] = strings.Split(values[0], ",")
@@ -190,11 +175,6 @@ func (res *resource) handleIndex(w http.ResponseWriter, r *http.Request, prefix 
 		return err
 	}
 
-	if res.controller != nil {
-		if err := res.controller.FindAll(r, &objs); err != nil {
-			return err
-		}
-	}
 	return respondWith(objs, prefix, http.StatusOK, w)
 }
 
@@ -216,11 +196,6 @@ func (res *resource) handleRead(w http.ResponseWriter, r *http.Request, ps httpr
 		return err
 	}
 
-	if res.controller != nil {
-		if err := res.controller.FindOne(r, &obj); err != nil {
-			return err
-		}
-	}
 	return respondWith(obj, prefix, http.StatusOK, w)
 }
 
@@ -232,11 +207,11 @@ func (res *resource) handleLinked(api *API, w http.ResponseWriter, r *http.Reque
 	// Iterate over all struct fields and determine the type of linked
 	for i := 0; i < res.resourceType.NumField(); i++ {
 		field := res.resourceType.Field(i)
-		fieldName := jsonify(field.Name)
+		fieldName := jsonapi.Jsonify(field.Name)
 		kind := field.Type.Kind()
 		if (kind == reflect.Ptr || kind == reflect.Slice) && fieldName == linked {
 			// Check if there is a resource for this type
-			fieldType := pluralize(jsonify(field.Type.Elem().Name()))
+			fieldType := jsonapi.Pluralize(jsonapi.Jsonify(field.Type.Elem().Name()))
 			for _, resource := range api.resources {
 				if resource.name == fieldType {
 					request := Request{
@@ -269,7 +244,8 @@ func (res *resource) handleCreate(w http.ResponseWriter, r *http.Request, prefix
 		return err
 	}
 	newObjs := reflect.MakeSlice(reflect.SliceOf(res.resourceType), 0, 0)
-	err = unmarshalInto(ctx, res.resourceType, &newObjs)
+
+	err = jsonapi.UnmarshalInto(ctx, res.resourceType, &newObjs)
 	if err != nil {
 		return err
 	}
@@ -278,12 +254,6 @@ func (res *resource) handleCreate(w http.ResponseWriter, r *http.Request, prefix
 	}
 
 	newObj := newObjs.Index(0).Interface()
-
-	if res.controller != nil {
-		if err := res.controller.Create(r, &newObj); err != nil {
-			return err
-		}
-	}
 
 	id, err := res.source.Create(newObj)
 	if err != nil {
@@ -310,7 +280,8 @@ func (res *resource) handleUpdate(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	updatingObjs := reflect.MakeSlice(reflect.SliceOf(res.resourceType), 1, 1)
 	updatingObjs.Index(0).Set(reflect.ValueOf(obj))
-	err = unmarshalInto(ctx, res.resourceType, &updatingObjs)
+
+	err = jsonapi.UnmarshalInto(ctx, res.resourceType, &updatingObjs)
 	if err != nil {
 		return err
 	}
@@ -319,11 +290,6 @@ func (res *resource) handleUpdate(w http.ResponseWriter, r *http.Request, ps htt
 	}
 
 	updatingObj := updatingObjs.Index(0).Interface()
-	if res.controller != nil {
-		if err := res.controller.Update(r, &updatingObj); err != nil {
-			return err
-		}
-	}
 
 	if err := res.source.Update(updatingObj); err != nil {
 		return err
@@ -333,13 +299,6 @@ func (res *resource) handleUpdate(w http.ResponseWriter, r *http.Request, ps htt
 }
 
 func (res *resource) handleDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) error {
-	id := ps.ByName("id")
-	if res.controller != nil {
-		if err := res.controller.Delete(r, id); err != nil {
-			return err
-		}
-	}
-
 	err := res.source.Delete(ps.ByName("id"))
 	if err != nil {
 		return err
@@ -349,7 +308,7 @@ func (res *resource) handleDelete(w http.ResponseWriter, r *http.Request, ps htt
 }
 
 func respondWith(obj interface{}, prefix string, status int, w http.ResponseWriter) error {
-	data, err := MarshalToJSONPrefix(obj, prefix)
+	data, err := jsonapi.MarshalToJSON(obj)
 	if err != nil {
 		return err
 	}

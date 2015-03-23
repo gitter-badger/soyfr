@@ -11,6 +11,11 @@ import "github.com/univedo/api2go"
 
 **api2go works, but we're still working on some rough edges. Things might change. Open an issue and join in!**
 
+Note: if you only need the marshaling functionality, you can install the subpackage via
+ ```go
+go get github.com/univedo/api2go/jsonapi
+``` 
+
 ## Usage
 
 Take the simple structs:
@@ -44,7 +49,7 @@ func (s *fixtureSource) FindOne(ID string, r api2go.Request) (interface{}, error
   // Return a single post by ID as Post
 }
 
-func (s *fixtureSource) FindMultiple(IDs string, r api2go.Request) (interface{}, error) {
+func (s *fixtureSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, error) {
   // Return multiple posts by ID as []Post
   // For example for Requests like GET /posts/1,2,3
 }
