@@ -1,6 +1,7 @@
 <link href="../../public/bower/polymer/polymer.html" rel="import">
 <link href="../../public/bower/paper-input/paper-input.html" rel="import">
 <link href="../../public/bower/paper-button/paper-button.html" rel="import">
+<link href="../../public/bower/core-ajax/core-ajax.html" rel="import">
 
 <polymer-element name="soyfr-registration">
     <template>
@@ -14,23 +15,42 @@
         </style>
         <div class="username-input">
             <paper-input-decorator label="Username" floatingLabel required>
-                <input is="core-input" type="text">
+                <input is="core-input" type="text" value="{{username}}">
             </paper-input-decorator>
         </div>
         <div class="password-input">
             <paper-input-decorator label="Password" floatingLabel>
-                <input is="core-input" type="password">
+                <input is="core-input" type="password" value="{{password}}">
             </paper-input-decorator>
         </div>
         <div class="password-input">
             <paper-input-decorator label="Password repeat" floatingLabel>
-                <input is="core-input" type="password">
+                <input is="core-input" type="password" value="{{passwordRepeat}}">
             </paper-input-decorator>
         </div>
-        <paper-button label="Register" role="button">Register</paper-button>
+        <paper-button on-tap="{{doSend}}" label="Register" role="button">Register</paper-button>
+
+        <core-ajax
+                id="registrationForm"
+                auto="false"
+                method="POST"
+                contentType="application/json"
+                url="/api/v1/users"
+                body='{"data" : [{"username" : "{{ username }}", "type" : "users"}]}'
+                response="{{response}}">
+
+        </core-ajax>
     </template>
 
     <script>
-        Polymer({});
+        Polymer('soyfr-registration', {
+            doSend: function () {
+                this.$.registrationForm.go();
+            },
+
+            reponseChanged: function (oldValue) {
+                console.log(this.reponseChanged);
+            }
+        });
     </script>
 </polymer-element>
