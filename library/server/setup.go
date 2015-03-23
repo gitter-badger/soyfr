@@ -81,13 +81,6 @@ func GetApplication() *cli.App {
 		EnvVar: EnvServerPort,
 	}
 
-	connectionString := cli.StringFlag{
-		Name:   "connectionURI",
-		Value:  "localhost",
-		Usage:  "localhost",
-		EnvVar: EnvConnectionURI,
-	}
-
 	databaseString := cli.StringFlag{
 		Name:   "database",
 		Value:  "soyfr_development",
@@ -102,9 +95,9 @@ func GetApplication() *cli.App {
 		EnvVar: EnvResourceFiles,
 	}
 
-	app.Flags = []cli.Flag{serverPortFlag, connectionString, databaseString, distPathString}
+	app.Flags = []cli.Flag{serverPortFlag, databaseString, distPathString}
 	app.Action = func(c *cli.Context) {
-		connectionString := c.String("connectionURI")
+		connectionString := db.GetConnectionString()
 		database := c.String("database")
 		distPath := c.String("resourceDirectory")
 		serverPort := c.Int("port")
