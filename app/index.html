@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1">
 
-    <link rel="import" href="./views/elements/main.html"/>
+    <link href="./public/bower/core-pages/core-pages.html" rel="import"/>
+    <link rel="stylesheet" href="./public/css/soyfr.min.css">
+
     <link rel="import" href="./views/elements/navigation.html"/>
     <link rel="import" href="./views/elements/registration.html">
 </head>
@@ -19,7 +21,7 @@
             </core-menu>
         </core-header-panel>
         <core-header-panel main>
-            <template is="auto-binding" id="application">
+            <template id="application" is="auto-binding">
                 <core-toolbar>
                     <core-icon-button id="navicon" icon="menu"></core-icon-button>
                     <div class="navigation-toolbar-logo">
@@ -43,5 +45,9 @@
             </template>
         </core-header-panel>
     </core-drawer-panel>
+
+    <script src="./public/bower/page.js/page.js"></script>
+    <script src="./public/bower/webcomponentsjs/webcomponents.min.js"></script>
+    <script src="./public/js/app.js"></script>
 </body>
 </html>
