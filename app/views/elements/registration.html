@@ -3,7 +3,7 @@
 <link href="../../public/bower/paper-button/paper-button.html" rel="import">
 <link href="../../public/bower/core-ajax/core-ajax.html" rel="import">
 
-<polymer-element name="soyfr-registration">
+<polymer-element name="soyfr-registration" attributes="url">
     <template>
         <style>
             :host {
@@ -31,14 +31,13 @@
         <paper-button on-tap="{{doSend}}" label="Register" role="button">Register</paper-button>
 
         <core-ajax
-                id="registrationForm"
                 auto="false"
+                id="registrationForm"
                 method="POST"
                 contentType="application/json"
-                url="/api/v1/users"
+                url="{{ url }}"
                 body='{"data" : [{"username" : "{{ username }}", "type" : "users"}]}'
                 response="{{response}}">
-
         </core-ajax>
     </template>
 
