@@ -3,12 +3,21 @@
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.2.0-26-gf7ebb76",
+			"Rev": "f7ebb761e83e21225d1d8954fde853bf8edd46c4"
+		},
+		{
 			"ImportPath": "github.com/gedex/inflector",
 			"Rev": "8c0e57904488c554ab26caec525db5c92b23f051"
 		},
 		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
 			"Rev": "46807412fe50aaceb73bb57061c2230fd26a1640"
+		},
+		{
+			"ImportPath": "github.com/lucas-clemente/go-http-logger",
+			"Rev": "0ba07d157a1e5a262f5e7f5ee7bf37719fa8b5d9"
 		},
 		{
 			"ImportPath": "github.com/maxwellhealth/bongo",
