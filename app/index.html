@@ -19,18 +19,28 @@
             </core-menu>
         </core-header-panel>
         <core-header-panel main>
-            <core-toolbar>
-                <core-icon-button id="navicon" icon="menu"></core-icon-button>
-                <div class="navigation-toolbar-logo">
-                    <core-icon icon="dashboard"></core-icon>
-                    Soyfr
-                </div>
-            </core-toolbar>
-            <paper-tabs>
-                <paper-tab>Register</paper-tab>
-                <paper-tab>Login</paper-tab>
-            </paper-tabs>
-            <soyfr-registration class="registration" url="/api/v1/users"></soyfr-registration>
+            <template is="auto-binding" id="application">
+                <core-toolbar>
+                    <core-icon-button id="navicon" icon="menu"></core-icon-button>
+                    <div class="navigation-toolbar-logo">
+                        <core-icon icon="dashboard"></core-icon>
+                        Soyfr {{ route }}
+                    </div>
+                </core-toolbar>
+                <paper-tabs selected="{{ route }}" valueattr="data-route">
+                    <paper-tab data-route="login">Login</paper-tab>
+                    <paper-tab data-route="register">Register</paper-tab>
+                </paper-tabs>
+
+                <core-pages selected="{{ route }}" valueattr="data-route">
+                    <section data-route="register">
+                        <soyfr-registration class="registration" url="/api/v1/users"></soyfr-registration>
+                    </section>
+                    <section data-route="login">
+                        login
+                    </section>
+                </core-pages>
+            </template>
         </core-header-panel>
     </core-drawer-panel>
 </body>
