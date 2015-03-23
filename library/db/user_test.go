@@ -2,10 +2,12 @@ package db
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"time"
 
 	"github.com/maxwellhealth/bongo"
@@ -19,14 +21,22 @@ var _ = Describe("User", func() {
 	var userSource *UserSource
 	var request api2go.Request
 
-	getBodyFromURL := func(URL string) string {
+	requestGET := func(URL string) (string, int) {
 		resp, err := http.Get(URL)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 		body, err := ioutil.ReadAll(resp.Body)
 		Expect(err).ToNot(HaveOccurred())
 		stringBody := string(body)
-		return stringBody
+		return stringBody, resp.StatusCode
+	}
+
+	requestPOST := func(URL string, data io.Reader) (string, int) {
+		resp, err := http.Post(URL, "text/json", data)
+		Expect(err).ToNot(HaveOccurred())
+		body, err := ioutil.ReadAll(resp.Body)
+		Expect(err).ToNot(HaveOccurred())
+		stringBody := string(body)
+		return stringBody, resp.StatusCode
 	}
 
 	BeforeEach(func() {
@@ -43,7 +53,26 @@ var _ = Describe("User", func() {
 		})
 
 		It("Should be able to list users", func() {
-			Expect(getBodyFromURL(server.URL + "/v1/users")).To(MatchJSON("{\"data\":[]}"))
+			body, status := requestGET(server.URL + "/v1/users")
+			Expect(status).To(Equal(http.StatusOK))
+			Expect(body).To(MatchJSON("{\"data\":[]}"))
+		})
+
+		It("Should be able to create a new user", func() {
+			data := `
+				{
+					"data" : [
+					{
+						"username" : "Unittest", 
+						"type" : "users"
+					} 
+					]
+				}
+			`
+			body, status := requestPOST(server.URL+"/v1/users", strings.NewReader(data))
+			Expect(status).To(Equal(http.StatusCreated))
+			Expect(body).ToNot(Equal(""))
+			Expect(body).ToNot(ContainSubstring("passwordHash"))
 		})
 	})
 

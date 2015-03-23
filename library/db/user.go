@@ -10,9 +10,10 @@ import (
 
 //User is a generic database user
 type User struct {
-	ID       bson.ObjectId `bson:"_id"`
-	Username string
-	exists   bool
+	ID           bson.ObjectId `bson:"_id"`
+	Username     string
+	PasswordHash string `json:"-"`
+	exists       bool
 }
 
 //SetIsNew satisfies the document base
@@ -28,6 +29,11 @@ func (u *User) IsNew() bool {
 //GetId Satisfy the document interface
 func (u *User) GetId() bson.ObjectId {
 	return u.ID
+}
+
+//GetID to satisfy api2go interface
+func (u User) GetID() string {
+	return u.ID.Hex()
 }
 
 //SetId satisfy the document interface
