@@ -1,4 +1,6 @@
-//changeset n.wagensonner:userUniqueUsernam
+//mongeez formatted javascript
+
+//changeset nwagensonner:userUniqueUsername
 db.user.remove({});
 
 db.user.createIndex(
