@@ -1,10 +1,7 @@
-<link href="../../public/bower/polymer/polymer.html" rel="import">
-<link href="../../public/bower/paper-input/paper-input.html" rel="import">
-<link href="../../public/bower/paper-button/paper-button.html" rel="import">
-<link href="../../public/bower/core-ajax/core-ajax.html" rel="import">
-<link href="../../public/bower/paper-toast/paper-toast.html" rel="import">
+<link rel="import" href="../elements.shared.html" />
+<link rel="import" href="../base-page/base-page.html">
 
-<polymer-element name="soyfr-login" attributes="url">
+<polymer-element name="login-form" attributes="url">
     <template>
         <style>
             :host {
@@ -26,11 +23,11 @@
             </paper-input-decorator>
         </div>
 
-        <paper-button on-tap="{{ doSend }}" label="Login" role="button">Login</paper-button>
+        <paper-button class="login-button" on-tap="{{ doSend }}" label="Login" role="button">Login</paper-button>
 
         <core-ajax
                 auto="false"
-                id="registrationForm"
+                id="loginForm"
                 method="POST"
                 contentType="application/json"
                 url="{{ url }}"
@@ -42,17 +39,17 @@
     </template>
 
     <script>
-        Polymer('soyfr-login', {
+        Polymer('login-form', {
             doSend: function () {
-                this.$.registrationForm.go();
+                this.$.loginForm.go();
             },
 
             handleError: function() {
-                // TODO: Handle error
+                // TODO: error handling
             },
 
             handleSuccess: function () {
-                // TODO: handle success only for valid data
+                this.fire('change-route', '/users');
             }
         });
     </script>

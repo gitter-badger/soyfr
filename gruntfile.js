@@ -23,7 +23,7 @@ module.exports = function(grunt){
           outputSourceFiles: true
         },
         files: {
-          'app/public/css/<%= pkg.name %>.css': 'app/public/less/bootstrap.less'
+          'app/css/<%= pkg.name %>.css': 'app/less/bootstrap.less'
         }
       },
       minify: {
@@ -32,7 +32,7 @@ module.exports = function(grunt){
           report: 'min'
         },
         files: {
-          'app/public/css/<%= pkg.name %>.min.css': 'app/public/css/<%= pkg.name %>.css'
+          'app/css/<%= pkg.name %>.min.css': 'app/css/<%= pkg.name %>.css'
         }
       }
     },

@@ -1,7 +1,6 @@
 build/
 .idea/
 node_modules
-app/public/css
-app/public/bower
-app/public/fonts
+app/bower
+app/css
 .DS_Store

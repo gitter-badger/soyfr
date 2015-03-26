@@ -2,54 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1">
+    <title>Soyfr</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
 
-    <link href="./public/bower/core-pages/core-pages.html" rel="import"/>
-    <link rel="stylesheet" href="./public/css/soyfr.min.css">
+    <script src="/bower/webcomponentsjs/webcomponents.min.js"></script>
 
-    <link rel="import" href="./views/elements/navigation.html"/>
-    <link rel="import" href="./views/elements/registration.html">
-    <link rel="import" href="./views/elements/login.html">
+    <link rel="import" href="/elements/elements.critical.html"/>
+    <link rel="stylesheet" href="/css/soyfr.min.css" />
 </head>
-<body fullbleed layout>
-    <core-drawer-panel id="drawerPanel">
-        <core-header-panel drawer>
-            <core-toolbar class="logo"></core-toolbar>
+<body unresolved>
+<template id="app" is="auto-binding">
+    <core-media-query query="min-width: 640px" queryMatches="{{largeScreen}}"></core-media-query>
 
-            <core-menu>
-                <core-item label="One"></core-item>
-                <core-item label="Two"></core-item>
-            </core-menu>
-        </core-header-panel>
-        <core-header-panel main>
-            <template id="application" is="auto-binding">
-                <core-toolbar>
-                    <core-icon-button id="navicon" icon="menu"></core-icon-button>
-                    <div class="navigation-toolbar-logo">
-                        <core-icon icon="dashboard"></core-icon>
-                        Soyfr {{ route }}
-                    </div>
-                </core-toolbar>
-                <paper-tabs selected="{{ route }}" valueattr="data-route">
-                    <paper-tab data-route="login">Login</paper-tab>
-                    <paper-tab data-route="register">Register</paper-tab>
-                </paper-tabs>
+    <core-animated-pages id="pages" selected="{{ route }}" valueattr="data-route"
+                         transitions="cross-fade fade-slide-up fade-scale" fit>
 
-                <core-pages selected="{{ route }}" valueattr="data-route">
-                    <section data-route="register">
-                        <soyfr-registration class="registration" url="/api/v1/users"></soyfr-registration>
-                    </section>
-                    <section data-route="login">
-                        <!-- TODO: add url for login -->
-                        <soyfr-login class="registration" url="#"></soyfr-login>
-                    </section>
-                </core-pages>
-            </template>
-        </core-header-panel>
-    </core-drawer-panel>
+        <section fullbleed layout vertical data-route="login">
+            <authentication-page class="page" id="auth" cross-fade?="{{largeScreen}}" flex></authentication-page>
+        </section>
 
-    <script src="./public/bower/page.js/page.js"></script>
-    <script src="./public/bower/webcomponentsjs/webcomponents.min.js"></script>
-    <script src="./public/js/app.js"></script>
+        <section layout vertical data-route="users">
+            <div class="page" cross-fade?="{{largeScreen}}">Test</div>
+        </section>
+    </core-animated-pages>
+</template>
+
+<script src="/bower/director/build/director.js"></script>
+<script src="/scripts/app.js"></script>
 </body>
 </html>
