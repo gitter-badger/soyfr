@@ -80,7 +80,7 @@ var _ = Describe("User", func() {
 		It("Should create a new user", func() {
 			By("storing it")
 			user := User{Username: "Unittest"}
-			id, err := userSource.Create(user)
+			id, err := userSource.Create(user, request)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(id).ToNot(Equal(""))
 			By("finding it again")
@@ -94,14 +94,14 @@ var _ = Describe("User", func() {
 		It("Should create a new user and update him", func() {
 			By("storing it")
 			user := User{Username: "Unittest"}
-			id, err := userSource.Create(user)
+			id, err := userSource.Create(user, request)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(id).ToNot(Equal(""))
 			user.ID = bson.ObjectIdHex(id)
 
 			By("renaming him")
 			user.Username = "New Unittest"
-			err = userSource.Update(user)
+			err = userSource.Update(user, request)
 			Expect(err).ToNot(HaveOccurred())
 
 			By("retrieving him from the database")
@@ -126,7 +126,7 @@ var _ = Describe("User", func() {
 			usersToAdd := []string{"userA", "userB", "userC"}
 			for _, username := range usersToAdd {
 				user := User{Username: username}
-				_, err := userSource.Create(user)
+				_, err := userSource.Create(user, request)
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -146,7 +146,7 @@ var _ = Describe("User", func() {
 			for i < maxUsers {
 				i++
 				user := User{Username: fmt.Sprintf("user_%d", i)}
-				idString, err := userSource.Create(user)
+				idString, err := userSource.Create(user, request)
 				Expect(err).ToNot(HaveOccurred())
 
 				if rand.Int()%2 == 0 {

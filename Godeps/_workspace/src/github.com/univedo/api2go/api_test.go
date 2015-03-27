@@ -149,7 +149,7 @@ func (s *fixtureSource) FindMultiple(IDs []string, req Request) (interface{}, er
 	return nil, NewHTTPError(nil, "post not found", http.StatusNotFound)
 }
 
-func (s *fixtureSource) Create(obj interface{}) (string, error) {
+func (s *fixtureSource) Create(obj interface{}, req Request) (string, error) {
 	p := obj.(Post)
 
 	if p.Title == "" {
@@ -171,12 +171,12 @@ func (s *fixtureSource) Create(obj interface{}) (string, error) {
 	return newID, nil
 }
 
-func (s *fixtureSource) Delete(id string) error {
+func (s *fixtureSource) Delete(id string, req Request) error {
 	delete(s.posts, id)
 	return nil
 }
 
-func (s *fixtureSource) Update(obj interface{}) error {
+func (s *fixtureSource) Update(obj interface{}, req Request) error {
 	p := obj.(Post)
 	if oldP, ok := s.posts[p.ID]; ok {
 		oldP.Title = p.Title
@@ -206,15 +206,15 @@ func (s *userSource) FindMultiple(IDs []string, req Request) (interface{}, error
 	return nil, nil
 }
 
-func (s *userSource) Create(obj interface{}) (string, error) {
+func (s *userSource) Create(obj interface{}, req Request) (string, error) {
 	return "", nil
 }
 
-func (s *userSource) Delete(id string) error {
+func (s *userSource) Delete(id string, req Request) error {
 	return nil
 }
 
-func (s *userSource) Update(obj interface{}) error {
+func (s *userSource) Update(obj interface{}, req Request) error {
 	return NewHTTPError(nil, "user not found", http.StatusNotFound)
 }
 
@@ -242,42 +242,16 @@ func (s *commentSource) FindMultiple(IDs []string, req Request) (interface{}, er
 	return nil, nil
 }
 
-func (s *commentSource) Create(obj interface{}) (string, error) {
+func (s *commentSource) Create(obj interface{}, req Request) (string, error) {
 	return "", nil
 }
 
-func (s *commentSource) Delete(id string) error {
+func (s *commentSource) Delete(id string, req Request) error {
 	return nil
 }
 
-func (s *commentSource) Update(obj interface{}) error {
+func (s *commentSource) Update(obj interface{}, req Request) error {
 	return NewHTTPError(nil, "comment not found", http.StatusNotFound)
-}
-
-type CustomController struct{}
-
-var controllerErrorText = "exciting error"
-var controllerError = NewHTTPError(nil, controllerErrorText, http.StatusInternalServerError)
-var controllerErrorJSON = []byte(`{"errors":[{"status":"500","title":"exciting error"}]}`)
-
-func (ctrl *CustomController) FindAll(r *http.Request, objs *interface{}) error {
-	return controllerError
-}
-
-func (ctrl *CustomController) FindOne(r *http.Request, obj *interface{}) error {
-	return controllerError
-}
-
-func (ctrl *CustomController) Create(r *http.Request, obj *interface{}) error {
-	return controllerError
-}
-
-func (ctrl *CustomController) Delete(r *http.Request, id string) error {
-	return controllerError
-}
-
-func (ctrl *CustomController) Update(r *http.Request, obj *interface{}) error {
-	return controllerError
 }
 
 var _ = Describe("RestHandler", func() {
@@ -488,7 +462,7 @@ var _ = Describe("RestHandler", func() {
 		})
 
 		It("POSTSs new objects with trailing slash automatic redirect enabled", func() {
-			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "types"; "posts"}]}`)
+			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "type": "posts"}]}`)
 			req, err := http.NewRequest("POST", "/v1/posts/", reqBody)
 			Expect(err).To(BeNil())
 			api.SetRedirectTrailingSlash(true)
@@ -496,8 +470,17 @@ var _ = Describe("RestHandler", func() {
 			Expect(rec.Code).To(Equal(http.StatusTemporaryRedirect))
 		})
 
+		It("POSTSs with client id", func() {
+			reqBody := strings.NewReader(`{"data": [{"id" : "100", "title": "New Post", "type": "posts"}]}`)
+			req, err := http.NewRequest("POST", "/v1/posts", reqBody)
+			Expect(err).To(BeNil())
+			api.Handler().ServeHTTP(rec, req)
+			Expect(rec.Code).To(Equal(http.StatusForbidden))
+			Expect(rec.Body).To(ContainSubstring("Client generated IDs are not supported."))
+		})
+
 		It("POSTSs new objects with trailing slash automatic redirect disabled", func() {
-			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "types": "posts"}]}`)
+			reqBody := strings.NewReader(`{"data": [{"title": "New Post", "type": "posts"}]}`)
 			req, err := http.NewRequest("POST", "/v1/posts/", reqBody)
 			Expect(err).To(BeNil())
 			api.SetRedirectTrailingSlash(false)
@@ -512,7 +495,7 @@ var _ = Describe("RestHandler", func() {
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusInternalServerError))
 			Expect(rec.Header().Get("Location")).To(Equal(""))
-			Expect(rec.Body.Bytes()).To(BeNil())
+			Expect(rec.Body.Bytes()).ToNot(HaveLen(0))
 		})
 
 		It("PUTSs multiple objects", func() {
@@ -522,7 +505,7 @@ var _ = Describe("RestHandler", func() {
 			api.Handler().ServeHTTP(rec, req)
 			Expect(rec.Code).To(Equal(http.StatusInternalServerError))
 			Expect(rec.Header().Get("Location")).To(Equal(""))
-			Expect(rec.Body.Bytes()).To(BeNil())
+			Expect(rec.Body.Bytes()).ToNot(HaveLen(0))
 		})
 
 		It("OPTIONS on collection route", func() {

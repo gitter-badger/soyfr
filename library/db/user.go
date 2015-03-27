@@ -107,7 +107,7 @@ func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, 
 }
 
 //Create satisfies api2go create interface
-func (s *UserSource) Create(obj interface{}) (string, error) {
+func (s *UserSource) Create(obj interface{}, r api2go.Request) (string, error) {
 	user, ok := obj.(User)
 	if !ok {
 		return "", errors.New("Invalid instance given")
@@ -123,8 +123,8 @@ func (s *UserSource) Create(obj interface{}) (string, error) {
 }
 
 //Delete deletes the instance
-func (s *UserSource) Delete(id string) error {
-	obj, err := s.FindOne(id, api2go.Request{})
+func (s *UserSource) Delete(id string, r api2go.Request) error {
+	obj, err := s.FindOne(id, r)
 	if err != nil {
 		return err
 	}
@@ -138,8 +138,8 @@ func (s *UserSource) Delete(id string) error {
 }
 
 //Update stores all changes on the user
-func (s *UserSource) Update(obj interface{}) error {
+func (s *UserSource) Update(obj interface{}, r api2go.Request) error {
 	//create and update are the same method in a odm
-	_, err := s.Create(obj)
+	_, err := s.Create(obj, r)
 	return err
 }

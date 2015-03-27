@@ -25,13 +25,13 @@ type DataSource interface {
 	FindMultiple(IDs []string, req Request) (interface{}, error)
 
 	// Create a new object and return its ID
-	Create(interface{}) (string, error)
+	Create(obj interface{}, req Request) (string, error)
 
 	// Delete an object
-	Delete(id string) error
+	Delete(id string, req Request) error
 
 	// Update an object
-	Update(obj interface{}) error
+	Update(obj interface{}, req Request) error
 }
 
 // API is a REST JSONAPI.
@@ -253,9 +253,23 @@ func (res *resource) handleCreate(w http.ResponseWriter, r *http.Request, prefix
 		return errors.New("expected one object in POST")
 	}
 
+	//TODO create multiple objects not only one.
 	newObj := newObjs.Index(0).Interface()
 
-	id, err := res.source.Create(newObj)
+	checkID, ok := newObj.(jsonapi.MarshalIdentifier)
+	if ok {
+		if checkID.GetID() != "" {
+			err := Error{
+				Status: string(http.StatusForbidden),
+				Title:  "Forbidden",
+				Detail: "Client generated IDs are not supported.",
+			}
+
+			return respondWith(err, prefix, http.StatusForbidden, w)
+		}
+	}
+
+	id, err := res.source.Create(newObj, buildRequest(r))
 	if err != nil {
 		return err
 	}
@@ -291,7 +305,7 @@ func (res *resource) handleUpdate(w http.ResponseWriter, r *http.Request, ps htt
 
 	updatingObj := updatingObjs.Index(0).Interface()
 
-	if err := res.source.Update(updatingObj); err != nil {
+	if err := res.source.Update(updatingObj, buildRequest(r)); err != nil {
 		return err
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -299,7 +313,7 @@ func (res *resource) handleUpdate(w http.ResponseWriter, r *http.Request, ps htt
 }
 
 func (res *resource) handleDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) error {
-	err := res.source.Delete(ps.ByName("id"))
+	err := res.source.Delete(ps.ByName("id"), buildRequest(r))
 	if err != nil {
 		return err
 	}
@@ -337,9 +351,10 @@ func handleError(err error, w http.ResponseWriter) {
 	if e, ok := err.(HTTPError); ok {
 		http.Error(w, marshalError(e), e.status)
 		return
+
 	}
 
-	w.WriteHeader(500)
+	http.Error(w, marshalError(err), http.StatusInternalServerError)
 }
 
 // Handler returns the http.Handler instance for the API.
