@@ -3,8 +3,8 @@ package db
 import (
 	"errors"
 
+	"github.com/manyminds/api2go"
 	"github.com/maxwellhealth/bongo"
-	"github.com/univedo/api2go"
 	"gopkg.in/mgo.v2/bson"
 )
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/manyminds/api2go"
 	"github.com/maxwellhealth/bongo"
-	"github.com/univedo/api2go"
 )
 
 const (
