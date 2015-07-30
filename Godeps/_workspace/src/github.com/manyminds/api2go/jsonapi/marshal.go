@@ -24,9 +24,14 @@ type ReferenceID struct {
 }
 
 // Reference information about possible references of a struct
+// If IsNotLoaded is set to true, the `data` field will be omitted and only the `links` object will be
+// generated. You should do this if there are some references, but you do not want to load them.
+// Otherwise, if IsNotLoaded is false and GetReferencedIDs() returns no IDs for this reference name, an
+// empty `data` field will be added which means that there are no references.
 type Reference struct {
-	Type string
-	Name string
+	Type        string
+	Name        string
+	IsNotLoaded bool
 }
 
 // MarshalReferences must be implemented if the struct to be serialized has relations. This must be done
@@ -226,7 +231,7 @@ func getStructRelationships(relationer MarshalLinkedRelations, information Serve
 	relationships := make(map[string]map[string]interface{})
 
 	for _, referenceID := range referencedIDs {
-		sortedResults[referenceID.Type] = append(sortedResults[referenceID.Type], referenceID)
+		sortedResults[referenceID.Name] = append(sortedResults[referenceID.Name], referenceID)
 	}
 
 	references := relationer.GetReferences()
@@ -237,8 +242,8 @@ func getStructRelationships(relationer MarshalLinkedRelations, information Serve
 		notIncludedReferences[reference.Name] = reference
 	}
 
-	for referenceType, referenceIDs := range sortedResults {
-		name := referenceIDs[0].Name
+	for name, referenceIDs := range sortedResults {
+		referenceType := referenceIDs[0].Type
 		relationships[name] = map[string]interface{}{}
 		// if referenceType is plural, we need to use an array for data, otherwise it's just an object
 		if Pluralize(name) == name {
@@ -273,13 +278,16 @@ func getStructRelationships(relationer MarshalLinkedRelations, information Serve
 	}
 
 	// check for empty references
-	for name := range notIncludedReferences {
+	for name, reference := range notIncludedReferences {
 		relationships[name] = map[string]interface{}{}
 		// Plural empty relationships need an empty array and empty to-one need a null in the json
-		if Pluralize(name) == name {
-			relationships[name]["data"] = []interface{}{}
-		} else {
-			relationships[name]["data"] = nil
+		if !reference.IsNotLoaded {
+			if Pluralize(name) == name {
+				relationships[name]["data"] = []interface{}{}
+			} else {
+				relationships[name]["data"] = nil
+			}
+
 		}
 		links := getLinksForServerInformation(relationer, name, information)
 		if len(links) > 0 {
@@ -358,6 +366,11 @@ func marshalStruct(data MarshalIdentifier, information ServerInformation) (map[s
 }
 
 func getStructType(data MarshalIdentifier) string {
+	entityName, ok := data.(EntityNamer)
+	if ok {
+		return entityName.GetName()
+	}
+
 	reflectType := reflect.TypeOf(data)
 	if reflectType.Kind() == reflect.Ptr {
 		return Pluralize(Jsonify(reflectType.Elem().Name()))

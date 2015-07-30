@@ -83,12 +83,14 @@ func (s *SimplePost) SetID(ID string) error {
 }
 
 type Post struct {
-	ID          int `json:"-"`
-	Title       string
-	Comments    []Comment     `json:"-"`
-	CommentsIDs []int         `json:"-"`
-	Author      *User         `json:"-"`
-	AuthorID    sql.NullInt64 `json:"-"`
+	ID            int `json:"-"`
+	Title         string
+	Comments      []Comment     `json:"-"`
+	CommentsIDs   []int         `json:"-"`
+	CommentsEmpty bool          `json:"-"`
+	Author        *User         `json:"-"`
+	AuthorID      sql.NullInt64 `json:"-"`
+	AuthorEmpty   bool          `json:"-"`
 }
 
 func (c Post) GetID() string {
@@ -109,12 +111,14 @@ func (c *Post) SetID(stringID string) error {
 func (c Post) GetReferences() []Reference {
 	return []Reference{
 		{
-			Type: "comments",
-			Name: "comments",
+			Type:        "comments",
+			Name:        "comments",
+			IsNotLoaded: c.CommentsEmpty,
 		},
 		{
-			Type: "users",
-			Name: "author",
+			Type:        "users",
+			Name:        "author",
+			IsNotLoaded: c.AuthorEmpty,
 		},
 	}
 }
@@ -341,6 +345,18 @@ func (s SqlNullPost) GetID() string {
 func (s *SqlNullPost) SetID(ID string) error {
 	s.ID = ID
 	return nil
+}
+
+type RenamedComment struct {
+	Data string
+}
+
+func (r RenamedComment) GetID() string {
+	return "666"
+}
+
+func (r RenamedComment) GetName() string {
+	return "renamed-comments"
 }
 
 type CompleteServerInformation struct{}

@@ -28,8 +28,8 @@
 		},
 		{
 			"ImportPath": "github.com/manyminds/api2go",
-			"Comment": "0.2-19-g24dfcfc",
-			"Rev": "24dfcfcd2ad8123d136a750efdbde2aeb407101b"
+			"Comment": "0.2-42-g9359261",
+			"Rev": "93592616d35c0549990eed907e56fedc04a09fbb"
 		},
 		{
 			"ImportPath": "github.com/maxwellhealth/bongo",

@@ -4,6 +4,8 @@ go:
   - 1.4
   - tip
 
+sudo: false
+
 install: 
   - go get -t -d -v ./...
   - go get github.com/onsi/ginkgo/ginkgo
@@ -14,5 +16,7 @@ script:
   - golint ./...
 
 notifications:
-  slack:
-    secure: OdP+maK3uhlYdaTjImPLnMeSxYcV2Kql/BjPW7uFzK4YVa2gkCDNqBGu8y4i47MbXCmXPutPOSOcIsjQ0Rgevr4fWjWBMXITqfZKF/UqrptIfQGP2T8LKm9TdhBCrtfW4EsBsTpOkgmQyWzihr0Zu1pwoeQ+HAesViuaSdriZGw=
+  webhooks:
+    urls: 
+      - https://webhooks.gitter.im/e/9caacfa1bede5e900019
+    on_success: change

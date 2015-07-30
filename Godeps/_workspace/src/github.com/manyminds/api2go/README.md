@@ -11,9 +11,7 @@ A [JSON API](http://jsonapi.org) Implementation for Go, to be used e.g. as serve
 import "github.com/manyminds/api2go"
 ```
 
-**api2go works, but we're still working on some rough edges. Things might change. Open an issue and join in!**
-
-**we moved the project from the univedo organization to manyminds. If you upgrade, please fix your import paths**
+**we are currently working to get all jsonapi 1.0 features implemented. So far most of the stuff is in. If you like to get involved please open an issue and join in!**
 
 Note: if you only need the marshaling functionality, you can install the subpackage via
  ```go
@@ -23,6 +21,7 @@ go get github.com/manyminds/api2go/jsonapi
 ## TOC
 - [Examples](#examples)
 - [Interfaces to implement](#interfaces-to-implement)
+  - [EntityNamer](#entitynamer)
   - [MarshalIdentifier](#marshalidentifier)
   - [UnmarshalIdentifier](#unmarshalidentifier)
   - [Marshalling with References to other structs](#marshalling-with-references-to-other-structs)
@@ -68,6 +67,34 @@ json ignore tag. Api2go will use the `GetID` method that you implemented for you
 
 In order to use different internal names for elements, you can specify a jsonapi tag. The api will marshal results now with the name in the tag.
 Create/Update/Delete works accordingly, but will fallback to the internal value as well if possible.
+
+### EntityNamer
+```go
+type EntityNamer interface {
+	GetName() string
+}
+```
+
+This is an interface which can be implemented optionally. Normally, the name of
+a struct will be automatically generated in its plural form. For example if
+your struct has the type `Post`, it's generated name is `posts`. And the url
+for the GET request for post with ID 1 would be `/posts/1`.
+
+If you implement the `GetName()` method and it returns `special-posts`, then
+this would be the name in the `type` field of the generated json and also the
+name for the generated routes.
+
+Currently, you must implement this interface, if you have a struct type that
+consists of multiple words and you want to use a **hyphenized** name. For example `UnicornPost`.
+Our default Jsonifier would then generate the name `unicornPosts`. But if you
+want the [recommended](http://jsonapi.org/recommendations/#naming) name, you
+have to implement `GetName`
+
+```go
+func (s UnicornPost) GetName() string {
+	return "unicorn-posts"
+}
+```
 
 ### MarshalIdentifier
 ```go
@@ -202,7 +229,7 @@ will yield
 
 You can also use `jsonapi.MarshalToJSONWithURLs` to automatically generate URLs for the rest endpoints that have a
 version and BaseURL prefix. This will generate the same routes that our API uses. This adds `self` and `related` fields
-for relations inside the `links` object.
+for relations inside the `relationships` object.
 
 Recover the structure from above using
 
@@ -336,12 +363,12 @@ GET     /v1/posts/<id>
 PATCH   /v1/posts/<id>
 DELETE  /v1/posts/<id>
 GET     /v1/posts/<id>/comments            // fetch referenced comments of a post
-GET     /v1/posts/<id>/links/comments      // fetch IDs of the referenced comments only
-PATCH   /v1/posts/<id>/links/comments      // replace all related comments
+GET     /v1/posts/<id>/relationships/comments      // fetch IDs of the referenced comments only
+PATCH   /v1/posts/<id>/relationships/comments      // replace all related comments
 
 // These 2 routes are only created for to-many relations that implement EditToManyRelations interface
-POST    /v1/posts/<id>/links/comments      // Add a new comment reference, only for to-many relations
-DELETE  /v1/posts/<id>/links/comments      // Delete a comment reference, only for to-many relations
+POST    /v1/posts/<id>/relationships/comments      // Add a new comment reference, only for to-many relations
+DELETE  /v1/posts/<id>/relationships/comments      // Delete a comment reference, only for to-many relations
 ```
 
 For the last two generated routes, it is necessary to implement the `jsonapi.EditToManyRelations` interface.
@@ -426,7 +453,7 @@ The IDs of a relationship can be fetched by following the `self` link of a relat
 of a result. For the posts and comments example you could use the following generated URL:
 
 ```
-GET /v1/posts/1/links/comments
+GET /v1/posts/1/relationships/comments
 ```
 
 This would return all comments that are currently referenced by post with ID 1. For example:
@@ -434,7 +461,7 @@ This would return all comments that are currently referenced by post with ID 1. 
 ```json
 {
   "links": {
-    "self": "/v1/posts/1/links/comments",
+    "self": "/v1/posts/1/relationships/comments",
     "related": "/v1/posts/1/comments"
   },
   "data": [
@@ -451,7 +478,7 @@ This would return all comments that are currently referenced by post with ID 1. 
 ```
 
 ### Fetching related resources
-Api2go always creates a `related` field for elements in the `links` object of the result. This is like it's
+Api2go always creates a `related` field for elements in the `relationships` object of the result. This is like it's
 specified on jsonapi.org. Post example:
 
 ```json
@@ -465,7 +492,7 @@ specified on jsonapi.org. Post example:
         "comments": {
           "links": {
             "related": "/v1/posts/1/comments",
-            "self": "/v1/posts/1/links/comments"
+            "self": "/v1/posts/1/relationships/comments"
           },
           "data": [
             {
