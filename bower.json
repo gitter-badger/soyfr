@@ -2,11 +2,6 @@
   "name": "soyfr",
   "version": "0.0.1",
   "dependencies": {
-    "bootstrap": "*",
-    "app-router": "*",
-    "polymer": "Polymer/polymer#~0.5.5",
-    "core-elements": "Polymer/core-elements#~0.5.5",
-    "paper-elements": "Polymer/paper-elements#~0.5.5",
-    "director": "~1.2.8"
+    "bootstrap": "*"
   }
 }

@@ -1,35 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Soyfr</title>
-    <link rel="icon" type="image/png" href="images/favicon.png" />
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
 
-    <script src="/bower/webcomponentsjs/webcomponents.min.js"></script>
+    <link href="/css/soyfr.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1>Welcome!</h1>
 
-    <link rel="import" href="/elements/elements.critical.html"/>
-    <link rel="stylesheet" href="/css/soyfr.min.css" />
-</head>
-<body unresolved>
-<template id="app" is="auto-binding">
-    <core-media-query query="min-width: 640px" queryMatches="{{largeScreen}}"></core-media-query>
-
-    <core-animated-pages id="pages" selected="{{ route }}" valueattr="data-route"
-                         transitions="cross-fade fade-slide-up fade-scale" fit>
-
-        <section fullbleed layout vertical data-route="login">
-            <authentication-page class="page" id="auth" cross-fade?="{{largeScreen}}" flex></authentication-page>
-        </section>
-
-        <section layout vertical data-route="users">
-            <div class="page" cross-fade?="{{largeScreen}}">Test</div>
-        </section>
-    </core-animated-pages>
-</template>
-
-<script src="/bower/director/build/director.js"></script>
-<script src="/scripts/app.js"></script>
-</body>
+    <script src="/bower/jquery/dist/jquery.min.js"></script>
+    <script src="/bower/dist/js/bootstrap.min.js"></script>
+  </body>
 </html>
