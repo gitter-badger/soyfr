@@ -81,6 +81,10 @@ func (d *DiffTracker) GetOriginalValue(field string) (interface{}, error) {
 
 }
 
+func (d *DiffTracker) SetOriginal(orig interface{}) {
+	d.original = reflect.Indirect(reflect.ValueOf(orig)).Interface()
+}
+
 func (d *DiffTracker) Clear() {
 	d.original = nil
 }
@@ -94,7 +98,7 @@ func (d *DiffTracker) Compare(useBson bool) (bool, []string, error) {
 		}
 	}()
 	if d.original != nil {
-		diffs, err := getChangedFields(d.original, d.current, useBson)
+		diffs, err := GetChangedFields(d.original, d.current, useBson)
 		return false, diffs, err
 	} else {
 		return true, []string{}, nil
@@ -124,7 +128,11 @@ func isNilOrInvalid(f reflect.Value) bool {
 	return (!f.IsValid())
 }
 
-func getChangedFields(struct1 interface{}, struct2 interface{}, useBson bool) ([]string, error) {
+type Stringer interface {
+	String() string
+}
+
+func GetChangedFields(struct1 interface{}, struct2 interface{}, useBson bool) ([]string, error) {
 
 	diffs := make([]string, 0)
 	val1 := reflect.ValueOf(struct1)
@@ -187,20 +195,20 @@ func getChangedFields(struct1 interface{}, struct2 interface{}, useBson bool) ([
 
 			var childDiffs []string
 			var err error
-			// Make sure they aren't zero-value
+			// Make sure they aren't zero-value. Skip if so
 			if isNilOrInvalid(field1) && isNilOrInvalid(field2) {
-				return diffs, nil
+				continue
 			} else if isNilOrInvalid(field1) || isNilOrInvalid(field2) {
 				childDiffs = getFields(childType)
 
 			} else {
-				// Special for time.Time and bson.ObjectId
-				if strings.HasSuffix(childType.String(), "time.Time") || strings.HasSuffix(childType.String(), "bson.ObjectId") {
+				if _, ok := field1.Interface().(Stringer); ok {
 					if fmt.Sprint(field1.Interface()) != fmt.Sprint(field2.Interface()) {
 						diffs = append(diffs, fieldName)
 					}
+
 				} else {
-					childDiffs, err = getChangedFields(field1.Interface(), field2.Interface(), useBson)
+					childDiffs, err = GetChangedFields(field1.Interface(), field2.Interface(), useBson)
 
 					if err != nil {
 						return diffs, err
