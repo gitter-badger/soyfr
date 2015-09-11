@@ -118,6 +118,7 @@ func startApplication(connectionString, database, distPath string, serverPort in
 
 	mux := http.NewServeMux()
 	fileHandler := http.FileServer(http.Dir(distPath))
+	mux.Handle("/s/", wrapAPIHandler(db.BootstrapWebsocket(&config)))
 	mux.Handle("/api/", wrapAPIHandler(db.BootstrapAPI(&config)))
 	mux.Handle("/", wrapFileHandler(distPath, fileHandler))
 

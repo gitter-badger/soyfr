@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/googollee/go-socket.io"
+	"github.com/manyminds/api2go"
 	"github.com/maxwellhealth/bongo"
 )
 
@@ -34,11 +35,15 @@ func GetConnectionString() string {
 	return FallbackConnectionString
 }
 
-//BootstrapAPI configures the api and returns the corresponding handler
+//BootstrapAPI
 func BootstrapAPI(config *bongo.Config) http.Handler {
-	/*
-	 *api := api2go.NewAPI("v1")
-	 */
+	api := api2go.NewAPI("v1")
+
+	return api.Handler()
+}
+
+//BootstrapWebsocket configures the api and returns the corresponding handler
+func BootstrapWebsocket(config *bongo.Config) http.Handler {
 	server, err := socketio.NewServer(nil)
 	if err != nil {
 		log.Fatal(err)
