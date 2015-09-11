@@ -90,7 +90,7 @@ func GetApplication() *cli.App {
 
 	distPathString := cli.StringFlag{
 		Name:   "resourceDirectory",
-		Value:  "./app/views",
+		Value:  "./public",
 		Usage:  "path to the resource files",
 		EnvVar: EnvResourceFiles,
 	}
