@@ -4,3 +4,4 @@ node_modules
 app/bower
 app/css
 .DS_Store
+typings

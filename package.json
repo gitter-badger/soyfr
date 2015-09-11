@@ -8,7 +8,9 @@
     "grunt-contrib-copy": "*",
     "grunt-contrib-less": "*",
     "grunt-contrib-watch": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "tsd": "*",
+    "typescript": "*"
   },
   "repository": {
     "type": "git",
