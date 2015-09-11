@@ -38,7 +38,13 @@ func GetConnectionString() string {
 //BootstrapAPI blub
 func BootstrapAPI(config *bongo.Config) http.Handler {
 	api := api2go.NewAPI("v1")
-	api.AddResource(User{}, UserSource{})
+	connection, err := bongo.Connect(config)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	api.AddResource(User{}, UserSource{connection: connection})
 
 	return api.Handler()
 }

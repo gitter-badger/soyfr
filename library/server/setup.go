@@ -57,9 +57,9 @@ func wrapFileHandler(distPath string, handler http.Handler) http.HandlerFunc {
 
 //wrapAPIHandler is a hack to let api2go be used within
 //the normal http mux functionality of go
-func wrapAPIHandler(handler http.Handler) http.HandlerFunc {
+func wrapAPIHandler(handler http.Handler, prefix string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.Replace(r.RequestURI, "/api", "", 1)
+		r.URL.Path = strings.Replace(r.RequestURI, prefix, "", 1)
 		handler.ServeHTTP(w, r)
 	}
 }
@@ -118,8 +118,8 @@ func startApplication(connectionString, database, distPath string, serverPort in
 
 	mux := http.NewServeMux()
 	fileHandler := http.FileServer(http.Dir(distPath))
-	mux.Handle("/s/", wrapAPIHandler(db.BootstrapWebsocket(&config)))
-	mux.Handle("/api/", wrapAPIHandler(db.BootstrapAPI(&config)))
+	mux.Handle("/s/", wrapAPIHandler(db.BootstrapWebsocket(&config), "/s"))
+	mux.Handle("/api/", wrapAPIHandler(db.BootstrapAPI(&config), "/api"))
 	mux.Handle("/", wrapFileHandler(distPath, fileHandler))
 
 	log.Printf("Server started on port :%d\n", serverPort)
