@@ -7,7 +7,8 @@
     "grunt-cli": "^0.1.13",
     "grunt-contrib-copy": "*",
     "grunt-contrib-less": "*",
-    "grunt-contrib-watch": "*"
+    "grunt-contrib-watch": "*",
+    "socket.io": "*"
   },
   "repository": {
     "type": "git",
