@@ -23,7 +23,7 @@ module.exports = function(grunt){
           outputSourceFiles: true
         },
         files: {
-          'app/css/<%= pkg.name %>.css': 'app/less/bootstrap.less'
+          'public/css/<%= pkg.name %>.css': 'public/less/bootstrap.less'
         }
       },
       minify: {
@@ -32,15 +32,15 @@ module.exports = function(grunt){
           report: 'min'
         },
         files: {
-          'app/css/<%= pkg.name %>.min.css': 'app/css/<%= pkg.name %>.css'
+          'public/css/<%= pkg.name %>.min.css': 'public/css/<%= pkg.name %>.css'
         }
       }
     },
 
     copy: {
       fonts: {
-        src: 'app/public/bower/bootstrap/fonts/*',
-        dest: 'app/public/fonts',
+        src: 'public/bower/bootstrap/fonts/*',
+        dest: 'public/fonts',
         expand: true,
         flatten: true,
         filter: 'isFile'
