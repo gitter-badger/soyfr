@@ -1,11 +1,12 @@
 package db
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/manyminds/api2go"
+	"github.com/googollee/go-socket.io"
 	"github.com/maxwellhealth/bongo"
 )
 
@@ -35,14 +36,24 @@ func GetConnectionString() string {
 
 //BootstrapAPI configures the api and returns the corresponding handler
 func BootstrapAPI(config *bongo.Config) http.Handler {
-	userSource, err := CreateUserSource(config)
-
+	/*
+	 *api := api2go.NewAPI("v1")
+	 */
+	server, err := socketio.NewServer(nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	server.On("connection", func(so socketio.Socket) {
+		log.Println("on connection")
+		so.Join("chat")
+		so.On("disconnection", func() {
+			log.Println("on disconnect")
+			so.BroadcastTo("chat", "chat message", "fick dich")
+		})
+	})
+	server.On("error", func(so socketio.Socket, err error) {
+		log.Println("error:", err)
+	})
 
-	api := api2go.NewAPI("v1")
-	api.AddResource(User{}, userSource)
-
-	return api.Handler()
+	return server
 }

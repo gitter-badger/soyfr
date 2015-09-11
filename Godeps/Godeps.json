@@ -1,10 +1,14 @@
 {
 	"ImportPath": "github.com/manyminds/soyfr",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/MichaelTJones/walk",
+			"Rev": "3af09438b0ab0e8f296410bfa646a7e635ea1fc0"
+		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-26-gf7ebb76",
@@ -15,8 +19,29 @@
 			"Rev": "8c0e57904488c554ab26caec525db5c92b23f051"
 		},
 		{
+			"ImportPath": "github.com/gokyle/fswatch",
+			"Rev": "1dbdf8320a690537582afe0f45c947f501adeaad"
+		},
+		{
 			"ImportPath": "github.com/golang/gddo/httputil",
 			"Rev": "1b04f691e2c88aefadf89c25dc867e7d27a61d31"
+		},
+		{
+			"ImportPath": "github.com/googollee/go-engine.io",
+			"Rev": "5525e3de461352f4c88d28287161ca2272c024ac"
+		},
+		{
+			"ImportPath": "github.com/googollee/go-socket.io",
+			"Comment": "0.9.x-35-g647d8ca",
+			"Rev": "647d8cabbf6b58e48570e56cb59692cbc8fdb1d3"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "6eb6ad425a89d9da7a5549bc6da8f79ba5c17844"
+		},
+		{
+			"ImportPath": "github.com/howeyc/gopass",
+			"Rev": "10b54de414cc9693221d5ff2ae14fd2fbf1b0ac1"
 		},
 		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
@@ -32,6 +57,10 @@
 			"Rev": "93592616d35c0549990eed907e56fedc04a09fbb"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Rev": "40e4aedc8fabf8c23e040057540867186712faa5"
+		},
+		{
 			"ImportPath": "github.com/maxwellhealth/bongo",
 			"Comment": "v0.9.4",
 			"Rev": "b88abb2a30a14fe626ab0798fada8decb56606f8"
@@ -39,6 +68,23 @@
 		{
 			"ImportPath": "github.com/maxwellhealth/go-dotaccess",
 			"Rev": "ae070a2d2a38fd7233e255ded21fb26fe36b4796"
+		},
+		{
+			"ImportPath": "github.com/mgutz/ansi",
+			"Rev": "452f5f5396543168418a299cd963697ac742b56e"
+		},
+		{
+			"ImportPath": "github.com/mgutz/minimist",
+			"Rev": "e3e5af13ccefb15bcf80187ae6879fcc99984fc9"
+		},
+		{
+			"ImportPath": "github.com/mgutz/str",
+			"Comment": "1.1.0-4-g968bf66",
+			"Rev": "968bf66e3da857419e4f6e71b2d5c9ae95682dc4"
+		},
+		{
+			"ImportPath": "github.com/mgutz/to",
+			"Rev": "d72775a547168f5dae1b0f0acc1a31da7e32f779"
 		},
 		{
 			"ImportPath": "github.com/oleiade/reflections",
@@ -54,6 +100,16 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-43-gf4f1cae",
 			"Rev": "f4f1caefe95e396ea97b72dd6c52973ae4a6978c"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Comment": "null-236",
+			"Rev": "69e2a90ed92d03812364aeb947b7068dc42e561e"
+		},
+		{
+			"ImportPath": "gopkg.in/godo.v1",
+			"Comment": "v1.4.5",
+			"Rev": "60979dc29b693e86b330512ce0a00f77856d5dd3"
 		},
 		{
 			"ImportPath": "gopkg.in/mgo.v2",
