@@ -8,7 +8,7 @@ import {Component,View, bootstrap, NgFor} from 'angular2/angular2';
 
 @View({
   directives: [NgFor],
-  templateUrl : 'views/user-input.html',
+  templateUrl : 'user-input.html',
 })
 
 // Component controller

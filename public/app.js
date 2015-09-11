@@ -25,7 +25,7 @@ var UserComponent = (function () {
         }),
         angular2_1.View({
             directives: [angular2_1.NgFor],
-            templateUrl: 'views/user-input.html',
+            templateUrl: 'user-input.html',
         }), 
         __metadata('design:paramtypes', [])
     ], UserComponent);
