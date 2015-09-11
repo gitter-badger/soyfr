@@ -6,11 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Soyfr</title>
 
+    <script src="https://github.jspm.io/jmcriffey/bower-traceur-runtime@0.0.87/traceur-runtime.js"></script>
+    <script src="https://jspm.io/system@0.16.js"></script>
+    <script src="https://code.angularjs.org/2.0.0-alpha.32/angular2.dev.js"></script>
+
     <link href="/css/soyfr.min.css" rel="stylesheet">
   </head>
   <body>
     <h1>Welcome!</h1>
 
+    <user-input></user-input>
+
+    <script>System.import('app');</script>
     <script src="/bower/jquery/dist/jquery.min.js"></script>
     <script src="/bower/dist/js/bootstrap.min.js"></script>
   </body>
