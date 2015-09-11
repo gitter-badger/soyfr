@@ -4,6 +4,7 @@
 
 [![GoDoc](https://godoc.org/github.com/manyminds/api2go?status.svg)](https://godoc.org/github.com/manyminds/api2go)
 [![Build Status](https://travis-ci.org/manyminds/api2go.svg?branch=master)](https://travis-ci.org/manyminds/api2go)
+[![Coverage Status](https://coveralls.io/repos/manyminds/api2go/badge.svg?branch=master&service=github)](https://coveralls.io/github/manyminds/api2go?branch=master)
 
 A [JSON API](http://jsonapi.org) Implementation for Go, to be used e.g. as server for [Ember Data](https://github.com/emberjs/data).
 
@@ -21,6 +22,7 @@ go get github.com/manyminds/api2go/jsonapi
 ## TOC
 - [Examples](#examples)
 - [Interfaces to implement](#interfaces-to-implement)
+  - [Responder](#responder)
   - [EntityNamer](#entitynamer)
   - [MarshalIdentifier](#marshalidentifier)
   - [UnmarshalIdentifier](#unmarshalidentifier)
@@ -67,6 +69,19 @@ json ignore tag. Api2go will use the `GetID` method that you implemented for you
 
 In order to use different internal names for elements, you can specify a jsonapi tag. The api will marshal results now with the name in the tag.
 Create/Update/Delete works accordingly, but will fallback to the internal value as well if possible.
+
+### Responder
+```go
+type Responder interface {
+	Metadata() map[string]interface{}
+	Result() interface{}
+	StatusCode() int
+}
+```
+
+The Responder interface must be implemented if you are using our API. It
+contains everything that is needed for a response. You can see an example usage
+of it in our example project.
 
 ### EntityNamer
 ```go
@@ -248,6 +263,7 @@ The `ContentMarshaler` interface declares two functions
 type ContentMarshaler interface {
   Marshal(i interface{}) ([]byte, error)
   Unmarshal(data []byte, i interface{}) error
+  MarshalError(err error) string
 }
 ```
 
@@ -304,19 +320,19 @@ First, write an implementation of `api2go.CRUD`. You have to implement at least 
 ```go
 type fixtureSource struct {}
 
-func (s *fixtureSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
+func (s *fixtureSource) FindOne(ID string, r api2go.Request) (Responder, error) {
   // Return a single post by ID as Post
 }
 
-func (s *fixtureSource) Create(obj interface{}, r api2go.Request) (string, error) {
+func (s *fixtureSource) Create(obj interface{}, r api2go.Request) (Responder, err error) {
   // Save the new Post in `obj` and return its ID.
 }
 
-func (s *fixtureSource) Delete(id string, r api2go.Request) error {
+func (s *fixtureSource) Delete(id string, r api2go.Request) (Responder, err error) {
   // Delete a post
 }
 
-func (s *fixtureSource) Update(obj interface{}, r api2go.Request) error {
+func (s *fixtureSource) Update(obj interface{}, r api2go.Request) (Responder, err error) {
   // Apply the new values in the Post in `obj`
 }
 ```
@@ -327,11 +343,11 @@ interfaces:
 ```go
 type FindAll interface {
 	// FindAll returns all objects
-	FindAll(req Request) (interface{}, error)
+	FindAll(req Request) (Responder, error)
 }
 
 type PaginatedFindAll interface {
-	PaginatedFindAll(req Request) (obj interface{}, totalCount uint, err error)
+	PaginatedFindAll(req Request) (totalCount uint, response Responder, err error)
 }
 ```
 
@@ -521,7 +537,7 @@ query Paramter and only return comments that belong to it. In this example, retu
 ## Tests
 
 ```sh
-go test
-ginkgo                # Alternative
-ginkgo watch -notify  # Watch for changes
+go test ./...
+ginkgo -r                # Alternative
+ginkgo watch -r -notify  # Watch for changes
 ```

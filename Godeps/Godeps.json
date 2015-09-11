@@ -45,7 +45,8 @@
 		},
 		{
 			"ImportPath": "github.com/julienschmidt/httprouter",
-			"Rev": "46807412fe50aaceb73bb57061c2230fd26a1640"
+			"Comment": "v1.1-3-g6aacfd5",
+			"Rev": "6aacfd5ab513e34f7e64ea9627ab9670371b34e7"
 		},
 		{
 			"ImportPath": "github.com/lucas-clemente/go-http-logger",
@@ -53,8 +54,8 @@
 		},
 		{
 			"ImportPath": "github.com/manyminds/api2go",
-			"Comment": "0.2-42-g9359261",
-			"Rev": "93592616d35c0549990eed907e56fedc04a09fbb"
+			"Comment": "0.2-70-gcf7c978",
+			"Rev": "cf7c978d02b09f033896c921dec3e470d2f06fbe"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
