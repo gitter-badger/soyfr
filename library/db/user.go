@@ -2,8 +2,10 @@ package db
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/manyminds/api2go"
+	"github.com/manyminds/soyfr/library/common"
 	"github.com/maxwellhealth/bongo"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -22,12 +24,12 @@ func (u *User) SetIsNew(isNew bool) {
 }
 
 //IsNew satisfies the document base
-func (u *User) IsNew() bool {
+func (u User) IsNew() bool {
 	return !u.exists
 }
 
 //GetId Satisfy the document interface
-func (u *User) GetId() bson.ObjectId {
+func (u User) GetId() bson.ObjectId {
 	return u.ID
 }
 
@@ -58,7 +60,7 @@ func CreateUserSource(config *bongo.Config) (*UserSource, error) {
 }
 
 //FindAll satisfies api2go data source interface
-func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
+func (s UserSource) FindAll(r api2go.Request) (interface{}, error) {
 	var users []User
 	user := User{}
 	//TODO introduce paging
@@ -75,11 +77,11 @@ func (s *UserSource) FindAll(r api2go.Request) (interface{}, error) {
 }
 
 //FindOne satisfies api2go data source interface
-func (s *UserSource) FindOne(ID string, r api2go.Request) (interface{}, error) {
+func (s UserSource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
 	user := User{}
 	err := s.connection.Collection("user").FindById(bson.ObjectIdHex(ID), &user)
 
-	return user, err
+	return common.Response{Res: user, Code: http.StatusOK}, err
 }
 
 //FindMultiple satifies api2go data source interface
@@ -107,39 +109,40 @@ func (s *UserSource) FindMultiple(IDs []string, r api2go.Request) (interface{}, 
 }
 
 //Create satisfies api2go create interface
-func (s *UserSource) Create(obj interface{}, r api2go.Request) (string, error) {
+func (s UserSource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	user, ok := obj.(User)
 	if !ok {
-		return "", errors.New("Invalid instance given")
+		return &common.Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
 	err := s.connection.Collection("user").Save(&user)
 
 	if err != nil {
-		return "", err
+		return &common.Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusBadRequest)
 	}
 
-	return user.GetId().Hex(), nil
+	return &common.Response{Res: user, Code: http.StatusCreated}, nil
 }
 
 //Delete deletes the instance
-func (s *UserSource) Delete(id string, r api2go.Request) error {
+func (s UserSource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
 	obj, err := s.FindOne(id, r)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	user, ok := obj.(User)
+	user, ok := obj.Result().(User)
 	if !ok {
-		return errors.New("Invalid instance given")
+		return nil, errors.New("Invalid instance given")
 	}
 
-	return s.connection.Collection("user").DeleteDocument(&user)
+	s.connection.Collection("user").DeleteDocument(&user)
+
+	return common.Response{Res: user, Code: http.StatusOK}, nil
 }
 
 //Update stores all changes on the user
-func (s *UserSource) Update(obj interface{}, r api2go.Request) error {
+func (s UserSource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	//create and update are the same method in a odm
-	_, err := s.Create(obj, r)
-	return err
+	return s.Create(obj, r)
 }
