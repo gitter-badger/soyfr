@@ -52,13 +52,13 @@ var _ = Describe("User", func() {
 			server = httptest.NewServer((BootstrapAPI(getDatabaseConfiguration())))
 		})
 
-		It("Should be able to list users", func() {
+		PIt("Should be able to list users", func() {
 			body, status := requestGET(server.URL + "/v1/users")
 			Expect(status).To(Equal(http.StatusOK))
 			Expect(body).To(MatchJSON("{\"data\":[]}"))
 		})
 
-		It("Should be able to create a new user", func() {
+		PIt("Should be able to create a new user", func() {
 			data := `
 				{
 					"data" : [
