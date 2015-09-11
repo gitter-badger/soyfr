@@ -8,7 +8,8 @@ a crowd based party drinking game
 ```
 brew install mongo
 npm install
-bower install
+./node_modules/.bin/bower install
+./node_modules/.bin/tsd install
 godep get
 ```
 
