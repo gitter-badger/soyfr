@@ -114,8 +114,8 @@
 		},
 		{
 			"ImportPath": "gopkg.in/mgo.v2",
-			"Comment": "r2015.01.24",
-			"Rev": "c6a7dce14133ccac2dcac3793f1d6e2ef048503a"
+			"Comment": "r2015.06.03-5-g22287ba",
+			"Rev": "22287bab4379e1fbf6002fb4eb769888f3fb224c"
 		}
 	]
 }

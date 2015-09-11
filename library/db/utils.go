@@ -39,6 +39,7 @@ func GetConnectionString() string {
 func BootstrapAPI(config *bongo.Config) http.Handler {
 	api := api2go.NewAPI("v1")
 	connection, err := bongo.Connect(config)
+	defer connection.Session.Close()
 
 	if err != nil {
 		log.Fatal(err)
